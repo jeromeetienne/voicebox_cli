@@ -34,6 +34,35 @@ export type GenerationResponse = {
 	created_at: string;
 };
 
+export type HistoryItem = {
+	id: string;
+	profile_id: string;
+	profile_name: string;
+	text: string;
+	language: string;
+	audio_path: string | null;
+	duration: number | null;
+	seed: number | null;
+	engine: string | null;
+	model_size: string | null;
+	status: string;
+	error: string | null;
+	is_favorited: boolean;
+	created_at: string;
+};
+
+export type HistoryListResponse = {
+	items: HistoryItem[];
+	total: number;
+};
+
+export type HistoryListParams = {
+	profileId?: string;
+	search?: string;
+	limit?: number;
+	offset?: number;
+};
+
 export type GenerationRequest = {
 	profile_id: string;
 	text: string;
@@ -289,6 +318,52 @@ export class VoiceboxClient {
 
 	async deleteProfileSample(sampleId: string): Promise<void> {
 		await this.requestVoid(`/profiles/samples/${sampleId}`, { method: 'DELETE' });
+	}
+
+	async listHistory(params: HistoryListParams = {}): Promise<HistoryListResponse> {
+		const query = new URLSearchParams();
+		if (params.profileId !== undefined) {
+			query.set('profile_id', params.profileId);
+		}
+		if (params.search !== undefined) {
+			query.set('search', params.search);
+		}
+		if (params.limit !== undefined) {
+			query.set('limit', String(params.limit));
+		}
+		if (params.offset !== undefined) {
+			query.set('offset', String(params.offset));
+		}
+		const suffix = query.toString();
+		return await this.requestJson<HistoryListResponse>(`/history${suffix === '' ? '' : `?${suffix}`}`);
+	}
+
+	async getHistory(generationId: string): Promise<HistoryItem> {
+		return await this.requestJson<HistoryItem>(`/history/${generationId}`);
+	}
+
+	async historyStats(): Promise<unknown> {
+		return await this.requestJson<unknown>('/history/stats');
+	}
+
+	async deleteHistory(generationId: string): Promise<void> {
+		await this.requestVoid(`/history/${generationId}`, { method: 'DELETE' });
+	}
+
+	async toggleFavorite(generationId: string): Promise<void> {
+		await this.requestVoid(`/history/${generationId}/favorite`, { method: 'POST' });
+	}
+
+	async clearFailedHistory(): Promise<void> {
+		await this.requestVoid('/history/failed', { method: 'DELETE' });
+	}
+
+	async exportHistory(generationId: string): Promise<Uint8Array> {
+		return await this.requestBytes(`/history/${generationId}/export`);
+	}
+
+	async exportHistoryAudio(generationId: string): Promise<Uint8Array> {
+		return await this.requestBytes(`/history/${generationId}/export-audio`);
 	}
 
 	async generate(request: GenerationRequest): Promise<GenerationResponse> {

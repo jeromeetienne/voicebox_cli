@@ -1,10 +1,8 @@
+# Dependencies
 node_modules/
-dist/
-data/
-.DS_Store
-*.log
 
-# generated audio
-*.wav
-*.mp3
-*.ogg
+# Build output
+dist/
+
+# macOS system files
+.DS_Store
