@@ -262,7 +262,7 @@ voicebox-cli stories items trim <story-id> <item-id> 250 100
 
 ### `transcribe`
 
-Transcribe an audio file to text. Pass the file path and, optionally, a language hint and a transcription model. By default it prints just the transcript; add `--json` to get the raw response including the audio duration.
+Transcribe an audio file to text. Pass the file path and, optionally, a language hint and a transcription model. By default it prints just the transcript; add `--json` to get the raw response including the audio duration. Non-WAV inputs (MP3, Opus, FLAC, and anything else ffmpeg can read) are transcoded to WAV locally before upload.
 
 ```
 voicebox-cli transcribe <file> [options]
@@ -280,6 +280,9 @@ Examples:
 ```bash
 # Simplest: audio file → transcript printed to stdout
 voicebox-cli transcribe outputs/take.wav
+
+# MP3 (or any ffmpeg-readable format) is converted to WAV automatically
+voicebox-cli transcribe outputs/take.mp3
 
 # Give a language hint for better accuracy
 voicebox-cli transcribe outputs/take.wav --language en

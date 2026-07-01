@@ -40,3 +40,14 @@ test('wavToMp3 produces valid mp3 bytes', async () => {
 	const isFrameSync = mp3[0] === 0xff && (mp3[1] & 0xe0) === 0xe0;
 	assert.ok(isId3 || isFrameSync, 'expected an ID3 tag or MPEG frame sync header');
 });
+
+test('toWav converts mp3 back to a RIFF/WAVE stream', async () => {
+	const mp3 = await AudioConvert.wavToMp3(silenceWav(), '64k');
+	const wav = await AudioConvert.toWav(mp3);
+
+	assert.ok(wav.byteLength > 44, 'expected a non-empty wav output');
+	const riff = String.fromCharCode(wav[0], wav[1], wav[2], wav[3]);
+	const wave = String.fromCharCode(wav[8], wav[9], wav[10], wav[11]);
+	assert.equal(riff, 'RIFF');
+	assert.equal(wave, 'WAVE');
+});

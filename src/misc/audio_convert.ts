@@ -22,17 +22,43 @@ export class AudioConvert {
 			throw new Error('ffmpeg-static did not provide a binary for this platform');
 		}
 
+		return await AudioConvert.run(wav, [
+			'-f', 'wav',
+			'-i', 'pipe:0',
+			'-codec:a', 'libmp3lame',
+			'-b:a', bitrate,
+			'-f', 'mp3',
+			'pipe:1',
+		]);
+	}
+
+	/**
+	 * Transcode any ffmpeg-readable audio to WAV using the bundled binary.
+	 *
+	 * The input format is auto-detected by ffmpeg, so this accepts MP3, Opus,
+	 * FLAC, and anything else ffmpeg can decode. Bytes are piped through
+	 * stdin/stdout, so nothing touches the filesystem.
+	 *
+	 * @param input Raw audio bytes in any ffmpeg-supported format.
+	 * @returns The encoded WAV bytes.
+	 * @throws If no ffmpeg binary is available or ffmpeg exits non-zero.
+	 */
+	static async toWav(input: Uint8Array): Promise<Uint8Array> {
+		return await AudioConvert.run(input, [
+			'-i', 'pipe:0',
+			'-f', 'wav',
+			'pipe:1',
+		]);
+	}
+
+	/** Run ffmpeg with the given args, piping `input` to stdin and returning stdout. */
+	private static async run(input: Uint8Array, args: string[]): Promise<Uint8Array> {
+		if (ffmpegPath === null) {
+			throw new Error('ffmpeg-static did not provide a binary for this platform');
+		}
+
 		return await new Promise((resolve, reject) => {
-			const ffmpeg = spawn(ffmpegPath, [
-				'-hide_banner',
-				'-loglevel', 'error',
-				'-f', 'wav',
-				'-i', 'pipe:0',
-				'-codec:a', 'libmp3lame',
-				'-b:a', bitrate,
-				'-f', 'mp3',
-				'pipe:1',
-			]);
+			const ffmpeg = spawn(ffmpegPath, ['-hide_banner', '-loglevel', 'error', ...args]);
 
 			const chunks: Uint8Array[] = [];
 			let stderr = '';
@@ -48,7 +74,7 @@ export class AudioConvert {
 				resolve(new Uint8Array(Buffer.concat(chunks)));
 			});
 
-			ffmpeg.stdin.write(wav);
+			ffmpeg.stdin.write(input);
 			ffmpeg.stdin.end();
 		});
 	}

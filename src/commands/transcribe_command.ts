@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
-import { basename } from 'node:path';
+import { basename, extname } from 'node:path';
 import type { Command } from 'commander';
+import { AudioConvert } from '../misc/audio_convert.js';
 import { VoiceboxClient } from '../misc/voicebox_client.js';
 
 /** Options accepted by the `transcribe` command. */
@@ -31,12 +32,22 @@ export class TranscribeCommand {
 	/**
 	 * Read the audio file, upload it for transcription, and print the
 	 * transcript (or the raw JSON with `--json`) (`POST /transcribe`).
+	 *
+	 * Inputs that are not already WAV are transcoded to WAV via ffmpeg before
+	 * upload, so MP3 and any other ffmpeg-readable format is accepted.
 	 */
 	static async run(file: string, options: TranscribeOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
-		const data = await readFile(file);
+		const raw = new Uint8Array(await readFile(file));
+
+		const isWav = extname(file).toLowerCase() === '.wav';
+		const data = isWav === true ? raw : await AudioConvert.toWav(raw);
+		const filename = isWav === true
+			? basename(file)
+			: `${basename(file, extname(file))}.wav`;
+
 		const result = await client.transcribe(
-			{ data, filename: basename(file) },
+			{ data, filename },
 			{ language: options.language, model: options.model },
 		);
 
