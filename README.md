@@ -152,6 +152,17 @@ Options:
 voicebox-cli shutdown --yes
 ```
 
+### `watchdog`
+
+Disable the parent-process watchdog so the server keeps running after the process that launched it exits.
+
+```
+voicebox-cli watchdog disable [options]
+
+Options:
+  --base-url <url>  API base url
+```
+
 ## Output formats
 
 The API serves WAV; the CLI transcodes locally.
@@ -178,6 +189,7 @@ src/
     channels_command.ts   # `channels` command group
     health_command.ts     # `health` command
     shutdown_command.ts   # `shutdown` command
+    watchdog_command.ts   # `watchdog` command
   misc/
     voicebox_client.ts    # VoiceboxClient — /speak, /profiles, status stream, audio download
     audio_convert.ts      # AudioConvert — WAV → MP3 via ffmpeg-static

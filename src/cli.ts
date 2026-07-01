@@ -6,6 +6,7 @@ import { HealthCommand } from './commands/health_command.js';
 import { ProfilesCommand } from './commands/profiles_command.js';
 import { ShutdownCommand } from './commands/shutdown_command.js';
 import { SpeakCommand } from './commands/speak_command.js';
+import { WatchdogCommand } from './commands/watchdog_command.js';
 
 type PackageJson = {
 	version: string;
@@ -28,6 +29,7 @@ export class Cli {
 		ChannelsCommand.register(program);
 		HealthCommand.register(program);
 		ShutdownCommand.register(program);
+		WatchdogCommand.register(program);
 
 		return program;
 	}

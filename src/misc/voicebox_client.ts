@@ -168,6 +168,10 @@ export class VoiceboxClient {
 		await this.requestVoid('/shutdown', { method: 'POST' });
 	}
 
+	async disableWatchdog(): Promise<void> {
+		await this.requestVoid('/watchdog/disable', { method: 'POST' });
+	}
+
 	async listChannels(): Promise<AudioChannel[]> {
 		return await this.requestJson<AudioChannel[]>('/channels');
 	}
