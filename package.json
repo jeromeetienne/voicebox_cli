@@ -13,7 +13,7 @@
 		"voice"
 	],
 	"bin": {
-		"voicebox": "dist/cli.js"
+		"voicebox-cli": "dist/cli.js"
 	},
 	"main": "dist/misc/voicebox_client.js",
 	"types": "dist/misc/voicebox_client.d.ts",

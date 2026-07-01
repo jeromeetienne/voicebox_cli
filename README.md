@@ -21,12 +21,12 @@ Or install it globally:
 
 ```bash
 npm install -g voicebox-cli
-voicebox speak "Hello, world!" --profile Test --output hello.mp3
+voicebox-cli speak "Hello, world!" --profile Test --output hello.mp3
 ```
 
 ## Usage
 
-Once installed, the `voicebox` binary is available. During development, run it from source via the `cli` script (uses `tsx`, no build step needed):
+Once installed, the `voicebox-cli` binary is available. During development, run it from source via the `cli` script (uses `tsx`, no build step needed):
 
 ```bash
 npm run cli -- speak "Hello, world!" --profile Test --output outputs/hello.mp3
@@ -35,7 +35,7 @@ npm run cli -- speak "Hello, world!" --profile Test --output outputs/hello.mp3
 ### `speak`
 
 ```
-voicebox speak <text> [options]
+voicebox-cli speak <text> [options]
 
 Options:
   -p, --profile <profile>    voice profile name or id

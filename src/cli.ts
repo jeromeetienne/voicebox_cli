@@ -16,7 +16,7 @@ export class Cli {
 
 		const program = new Command();
 		program
-			.name('voicebox')
+			.name('voicebox-cli')
 			.description('Command-line client for the voicebox TTS API')
 			.version(packageJson.version, '-V, --version', 'output the version from package.json');
 
