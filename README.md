@@ -51,6 +51,34 @@ Options:
 
 The output format is chosen from the file extension: `.mp3` transcodes via `ffmpeg-static`, anything else writes the raw WAV returned by the API.
 
+Examples:
+
+```bash
+# Simplest: text + voice profile → speech.mp3 (the default output)
+voicebox-cli speak "Hello there!" --profile Test
+
+# Save to a specific MP3 file
+voicebox-cli speak "Hello there!" --profile Test --output outputs/hello.mp3
+
+# Save as WAV instead (any non-.mp3 extension writes raw WAV)
+voicebox-cli speak "Hello there!" --profile Test --output outputs/hello.wav
+
+# French, with a French voice
+voicebox-cli speak "Bonjour tout le monde !" --profile manukipu --language fr
+
+# Rewrite the text in the profile's character before speaking
+voicebox-cli speak "Tell me about your day." --profile donaldy --personality
+
+# Pick a specific engine
+voicebox-cli speak "Testing the kokoro engine." --profile Test --engine kokoro
+
+# Point at a server on another host/port
+voicebox-cli speak "Remote server test." --profile Test --base-url http://192.168.1.50:17493
+
+# Using short flags
+voicebox-cli speak "Short and sweet." -p Test -o outputs/quick.mp3
+```
+
 ### `generate`
 
 The low-level counterpart to `speak`. It targets a profile by **id** (not name) and exposes the full generation request: seed, instruction/style prompt, model size, engine, chunking for long text, crossfade, and volume normalization. It also manages the lifecycle of an existing generation — retry a failed one, regenerate from scratch, cancel an in-progress job, or wait on its status.
