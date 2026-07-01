@@ -49,6 +49,25 @@ Options:
 
 The output format is chosen from the file extension: `.mp3` transcodes via `ffmpeg-static`, anything else writes the raw WAV returned by the API.
 
+### `health`
+
+```
+voicebox-cli health [options]
+
+Options:
+  -f, --filesystem  check filesystem health instead
+  --json            print the raw JSON response
+  --base-url <url>  API base url
+```
+
+```bash
+$ voicebox-cli health
+status: healthy
+model: loaded (1.7B)
+gpu: MPS (Apple Silicon)
+backend: mlx (cpu)
+```
+
 ## Output formats
 
 The API serves WAV; the CLI transcodes locally.
@@ -72,6 +91,7 @@ src/
   commands/
     speak_command.ts      # `speak` command
     profiles_command.ts   # `profiles` command group
+    health_command.ts     # `health` command
   misc/
     voicebox_client.ts    # VoiceboxClient — /speak, /profiles, status stream, audio download
     audio_convert.ts      # AudioConvert — WAV → MP3 via ffmpeg-static

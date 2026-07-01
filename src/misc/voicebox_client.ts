@@ -42,6 +42,33 @@ export type GenerationStatus = {
 	source: string;
 };
 
+export type HealthResponse = {
+	status: string;
+	model_loaded: boolean;
+	model_downloaded: boolean | null;
+	model_size: string | null;
+	gpu_available: boolean;
+	gpu_type: string | null;
+	vram_used_mb: number | null;
+	backend_type: string | null;
+	backend_variant: string | null;
+	gpu_compatibility_warning: string | null;
+};
+
+export type DirectoryCheck = {
+	path: string;
+	exists: boolean;
+	writable: boolean;
+	error: string | null;
+};
+
+export type FilesystemHealthResponse = {
+	healthy: boolean;
+	disk_free_mb: number | null;
+	disk_total_mb: number | null;
+	directories: DirectoryCheck[];
+};
+
 export type VoiceProfile = {
 	id: string;
 	name: string;
@@ -118,6 +145,14 @@ export class VoiceboxClient {
 			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify(body),
 		};
+	}
+
+	async health(): Promise<HealthResponse> {
+		return await this.requestJson<HealthResponse>('/health');
+	}
+
+	async filesystemHealth(): Promise<FilesystemHealthResponse> {
+		return await this.requestJson<FilesystemHealthResponse>('/health/filesystem');
 	}
 
 	async listProfiles(): Promise<VoiceProfile[]> {

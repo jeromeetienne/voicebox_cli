@@ -87,6 +87,27 @@ test('addProfileSample posts multipart form data', async () => {
 	assert.equal((init?.body as FormData).get('reference_text'), 'hello there');
 });
 
+test('health hits /health and parses the response', async () => {
+	const calls = stubFetch(() => new Response(
+		JSON.stringify({ status: 'healthy', model_loaded: true, gpu_available: false }),
+		{ status: 200 },
+	));
+	const health = await new VoiceboxClient('http://example.test').health();
+	assert.equal(calls[0].url, 'http://example.test/health');
+	assert.equal(health.status, 'healthy');
+	assert.equal(health.model_loaded, true);
+});
+
+test('filesystemHealth hits /health/filesystem', async () => {
+	const calls = stubFetch(() => new Response(
+		JSON.stringify({ healthy: true, disk_free_mb: 10, disk_total_mb: 20, directories: [] }),
+		{ status: 200 },
+	));
+	const fs = await new VoiceboxClient('http://example.test').filesystemHealth();
+	assert.equal(calls[0].url, 'http://example.test/health/filesystem');
+	assert.equal(fs.healthy, true);
+});
+
 test('waitForCompletion resolves on the terminal SSE event', async () => {
 	stubFetch(() => sseResponse([
 		'data: {"id":"g1","status":"generating","duration":0,"error":null,"source":"manual"}\n\n',
