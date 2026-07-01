@@ -37,7 +37,7 @@ npm run cli -- speak "Hello, world!" --profile Test --output outputs/hello.mp3
 Synthesize speech from text with a chosen voice profile and save it to a file. The command submits the text to the API, waits for the asynchronous generation to complete, downloads the resulting audio, and writes it locally. Pick the voice with `--profile`, steer synthesis with `--language` and `--engine`, and use `--personality` to rewrite the text in the profile's character before it is spoken.
 
 ```
-voicebox-cli speak <text> [options]
+npx voicebox-cli speak <text> [options]
 
 Options:
   -p, --profile <profile>    voice profile name or id
@@ -55,28 +55,28 @@ Examples:
 
 ```bash
 # Simplest: text + voice profile → speech.mp3 (the default output)
-voicebox-cli speak "Hello there!" --profile Test
+npx voicebox-cli speak "Hello there!" --profile Test
 
 # Save to a specific MP3 file
-voicebox-cli speak "Hello there!" --profile Test --output outputs/hello.mp3
+npx voicebox-cli speak "Hello there!" --profile Test --output outputs/hello.mp3
 
 # Save as WAV instead (any non-.mp3 extension writes raw WAV)
-voicebox-cli speak "Hello there!" --profile Test --output outputs/hello.wav
+npx voicebox-cli speak "Hello there!" --profile Test --output outputs/hello.wav
 
 # French, with a French voice
-voicebox-cli speak "Bonjour tout le monde !" --profile manukipu --language fr
+npx voicebox-cli speak "Bonjour tout le monde !" --profile manukipu --language fr
 
 # Rewrite the text in the profile's character before speaking
-voicebox-cli speak "Tell me about your day." --profile donaldy --personality
+npx voicebox-cli speak "Tell me about your day." --profile donaldy --personality
 
 # Pick a specific engine
-voicebox-cli speak "Testing the kokoro engine." --profile Test --engine kokoro
+npx voicebox-cli speak "Testing the kokoro engine." --profile Test --engine kokoro
 
 # Point at a server on another host/port
-voicebox-cli speak "Remote server test." --profile Test --base-url http://192.168.1.50:17493
+npx voicebox-cli speak "Remote server test." --profile Test --base-url http://192.168.1.50:17493
 
 # Using short flags
-voicebox-cli speak "Short and sweet." -p Test -o outputs/quick.mp3
+npx voicebox-cli speak "Short and sweet." -p Test -o outputs/quick.mp3
 ```
 
 ### `generate`
@@ -84,11 +84,11 @@ voicebox-cli speak "Short and sweet." -p Test -o outputs/quick.mp3
 The low-level counterpart to `speak`. It targets a profile by **id** (not name) and exposes the full generation request: seed, instruction/style prompt, model size, engine, chunking for long text, crossfade, and volume normalization. It also manages the lifecycle of an existing generation — retry a failed one, regenerate from scratch, cancel an in-progress job, or wait on its status.
 
 ```
-voicebox-cli generate run <profile-id> <text> [options]
-voicebox-cli generate retry <id>
-voicebox-cli generate regenerate <id>
-voicebox-cli generate cancel <id>
-voicebox-cli generate status <id>
+npx voicebox-cli generate run <profile-id> <text> [options]
+npx voicebox-cli generate retry <id>
+npx voicebox-cli generate regenerate <id>
+npx voicebox-cli generate cancel <id>
+npx voicebox-cli generate status <id>
 
 run options:
   -o, --output <path>    output file (.mp3 or .wav)   (default: outputs/generation.mp3)
@@ -105,7 +105,7 @@ run options:
 ```
 
 ```bash
-voicebox-cli generate run <profile-id> "A precise, reproducible take." --seed 42 -o outputs/take.wav
+npx voicebox-cli generate run <profile-id> "A precise, reproducible take." --seed 42 -o outputs/take.wav
 ```
 
 ### `profiles`
@@ -113,7 +113,7 @@ voicebox-cli generate run <profile-id> "A precise, reproducible take." --seed 42
 Create, inspect, and delete the voice profiles that `speak` uses, and manage the reference samples a cloned voice is built from. A profile bundles a voice's language, engine defaults, and an optional personality prompt; samples are short audio clips plus their transcripts that teach the clone how the voice sounds. `update` merges your changes with the profile's current values, so you only pass the fields you want to change.
 
 ```
-voicebox-cli profiles <subcommand> [options]
+npx voicebox-cli profiles <subcommand> [options]
 
 Subcommands:
   list                              list all profiles
@@ -146,12 +146,12 @@ Subcommands:
 
 ```bash
 # create a profile, then clone a voice into it from a reference clip
-voicebox-cli profiles create "Narrator" --language en --personality "calm and warm"
-voicebox-cli profiles samples add <profile-id> sample.wav "This is my reference voice."
+npx voicebox-cli profiles create "Narrator" --language en --personality "calm and warm"
+npx voicebox-cli profiles samples add <profile-id> sample.wav "This is my reference voice."
 
 # list profiles, then generate with one
-voicebox-cli profiles list
-voicebox-cli speak "Hello there" --profile Narrator -o outputs/hello.mp3
+npx voicebox-cli profiles list
+npx voicebox-cli speak "Hello there" --profile Narrator -o outputs/hello.mp3
 ```
 
 ### `channels`
@@ -159,7 +159,7 @@ voicebox-cli speak "Hello there" --profile Narrator -o outputs/hello.mp3
 Manage audio output channels and the voices assigned to them. A channel is a named output route that binds a set of audio devices to a set of voice profiles, letting the server play different voices through different speakers. Use these subcommands to create channels, attach output devices, and control which profiles belong to each one.
 
 ```
-voicebox-cli channels <subcommand> [options]
+npx voicebox-cli channels <subcommand> [options]
 
 Subcommands:
   list                              list all channels
@@ -172,8 +172,8 @@ Subcommands:
 ```
 
 ```bash
-voicebox-cli channels create "Living room" --device dev-1 --device dev-2
-voicebox-cli channels set-voices <channel-id> <profile-id-a> <profile-id-b>
+npx voicebox-cli channels create "Living room" --device dev-1 --device dev-2
+npx voicebox-cli channels set-voices <channel-id> <profile-id-a> <profile-id-b>
 ```
 
 ### `history`
@@ -181,19 +181,19 @@ voicebox-cli channels set-voices <channel-id> <profile-id-a> <profile-id-b>
 Browse and manage past generations. `list` supports filtering by profile and free-text search with pagination; `get` and `stats` inspect a single item or aggregate totals; `favorite`, `delete`, and `clear-failed` manage entries; and `export` / `export-audio` save a generation's archive or audio to disk.
 
 ```
-voicebox-cli history list [-p <profile-id>] [-s <search>] [--limit <n>] [--offset <n>]
-voicebox-cli history get <id>
-voicebox-cli history stats
-voicebox-cli history favorite <id>
-voicebox-cli history delete <id>
-voicebox-cli history clear-failed
-voicebox-cli history export <id> [-o <path>]          # zip (default: outputs/<id>.zip)
-voicebox-cli history export-audio <id> [-o <path>]    # wav (default: outputs/<id>.wav)
+npx voicebox-cli history list [-p <profile-id>] [-s <search>] [--limit <n>] [--offset <n>]
+npx voicebox-cli history get <id>
+npx voicebox-cli history stats
+npx voicebox-cli history favorite <id>
+npx voicebox-cli history delete <id>
+npx voicebox-cli history clear-failed
+npx voicebox-cli history export <id> [-o <path>]          # zip (default: outputs/<id>.zip)
+npx voicebox-cli history export-audio <id> [-o <path>]    # wav (default: outputs/<id>.wav)
 ```
 
 ```bash
-voicebox-cli history list --profile <profile-id> --search "hello" --limit 20
-voicebox-cli history export-audio <id> -o outputs/take.wav
+npx voicebox-cli history list --profile <profile-id> --search "hello" --limit 20
+npx voicebox-cli history export-audio <id> -o outputs/take.wav
 ```
 
 ### `models`
@@ -201,22 +201,22 @@ voicebox-cli history export-audio <id> -o outputs/take.wav
 Manage the TTS models the server can use. `status` lists every model with its download and loaded state; `load` and `unload` control what sits in memory; `download`, `cancel-download`, and `delete` manage what is on disk; `cache-dir` shows where models are stored; and `progress`, `migrate`, and `migrate-progress` stream live progress from download and directory-migration tasks.
 
 ```
-voicebox-cli models status
-voicebox-cli models load [size]                      # size defaults to the server default
-voicebox-cli models unload [name]                    # no name unloads the default model
-voicebox-cli models download <name>
-voicebox-cli models cancel-download <name>
-voicebox-cli models delete <name>
-voicebox-cli models cache-dir
-voicebox-cli models progress <name>                  # streams SSE progress
-voicebox-cli models migrate <destination>            # streams SSE progress
-voicebox-cli models migrate-progress                 # streams SSE progress
+npx voicebox-cli models status
+npx voicebox-cli models load [size]                      # size defaults to the server default
+npx voicebox-cli models unload [name]                    # no name unloads the default model
+npx voicebox-cli models download <name>
+npx voicebox-cli models cancel-download <name>
+npx voicebox-cli models delete <name>
+npx voicebox-cli models cache-dir
+npx voicebox-cli models progress <name>                  # streams SSE progress
+npx voicebox-cli models migrate <destination>            # streams SSE progress
+npx voicebox-cli models migrate-progress                 # streams SSE progress
 ```
 
 ```bash
-voicebox-cli models status
-voicebox-cli models load 1.7B
-voicebox-cli models download qwen-1.7b
+npx voicebox-cli models status
+npx voicebox-cli models load 1.7B
+npx voicebox-cli models download qwen-1.7b
 ```
 
 ### `stories`
@@ -224,40 +224,40 @@ voicebox-cli models download qwen-1.7b
 Assemble multi-clip stories from existing generations on a timeline and export them as one mixed audio file. The top-level subcommands manage stories themselves (`list`, `get`, `create`, `update`, `delete`, `export-audio`); the `stories items` subgroup manages the clips on a story's timeline — adding, removing, reordering, moving, trimming, adjusting per-clip volume, splitting, duplicating, and pinning a clip to a specific generation version.
 
 ```
-voicebox-cli stories list
-voicebox-cli stories get <id>
-voicebox-cli stories create <name> [-d <description>]
-voicebox-cli stories update <id> <name> [-d <description>]
-voicebox-cli stories delete <id>
-voicebox-cli stories export-audio <id> [-o <path>]        # wav (default: outputs/<id>.wav)
+npx voicebox-cli stories list
+npx voicebox-cli stories get <id>
+npx voicebox-cli stories create <name> [-d <description>]
+npx voicebox-cli stories update <id> <name> [-d <description>]
+npx voicebox-cli stories delete <id>
+npx voicebox-cli stories export-audio <id> [-o <path>]        # wav (default: outputs/<id>.wav)
 
-voicebox-cli stories items add <story-id> <generation-id> [--start-time-ms <n>] [--track <n>]
-voicebox-cli stories items remove <story-id> <item-id>
-voicebox-cli stories items times <story-id> <gen-id:ms>...   # e.g. g1:0 g2:2500
-voicebox-cli stories items reorder <story-id> <generation-id>...
-voicebox-cli stories items move <story-id> <item-id> <start-time-ms> [--track <n>]
-voicebox-cli stories items trim <story-id> <item-id> <trim-start-ms> <trim-end-ms>
-voicebox-cli stories items volume <story-id> <item-id> <volume>   # linear gain 0.0-2.0
-voicebox-cli stories items split <story-id> <item-id> <split-time-ms>
-voicebox-cli stories items duplicate <story-id> <item-id>
-voicebox-cli stories items version <story-id> <item-id> [version-id]   # omit to clear the pin
+npx voicebox-cli stories items add <story-id> <generation-id> [--start-time-ms <n>] [--track <n>]
+npx voicebox-cli stories items remove <story-id> <item-id>
+npx voicebox-cli stories items times <story-id> <gen-id:ms>...   # e.g. g1:0 g2:2500
+npx voicebox-cli stories items reorder <story-id> <generation-id>...
+npx voicebox-cli stories items move <story-id> <item-id> <start-time-ms> [--track <n>]
+npx voicebox-cli stories items trim <story-id> <item-id> <trim-start-ms> <trim-end-ms>
+npx voicebox-cli stories items volume <story-id> <item-id> <volume>   # linear gain 0.0-2.0
+npx voicebox-cli stories items split <story-id> <item-id> <split-time-ms>
+npx voicebox-cli stories items duplicate <story-id> <item-id>
+npx voicebox-cli stories items version <story-id> <item-id> [version-id]   # omit to clear the pin
 ```
 
 Examples:
 
 ```bash
 # Create a story and add two generations to its timeline
-voicebox-cli stories create "Chapter 1" --description "The opening scene"
-voicebox-cli stories items add <story-id> <generation-id>
-voicebox-cli stories items add <story-id> <generation-id> --start-time-ms 3000
+npx voicebox-cli stories create "Chapter 1" --description "The opening scene"
+npx voicebox-cli stories items add <story-id> <generation-id>
+npx voicebox-cli stories items add <story-id> <generation-id> --start-time-ms 3000
 
 # Reorder by generation id, then export the mixed audio
-voicebox-cli stories items reorder <story-id> <gen-a> <gen-b>
-voicebox-cli stories export-audio <story-id> -o outputs/chapter1.wav
+npx voicebox-cli stories items reorder <story-id> <gen-a> <gen-b>
+npx voicebox-cli stories export-audio <story-id> -o outputs/chapter1.wav
 
 # Fine-tune a single clip
-voicebox-cli stories items volume <story-id> <item-id> 0.8
-voicebox-cli stories items trim <story-id> <item-id> 250 100
+npx voicebox-cli stories items volume <story-id> <item-id> 0.8
+npx voicebox-cli stories items trim <story-id> <item-id> 250 100
 ```
 
 ### `transcribe`
@@ -265,7 +265,7 @@ voicebox-cli stories items trim <story-id> <item-id> 250 100
 Transcribe an audio file to text. Pass the file path and, optionally, a language hint and a transcription model. By default it prints just the transcript; add `--json` to get the raw response including the audio duration. Non-WAV inputs (MP3, Opus, FLAC, and anything else ffmpeg can read) are transcoded to WAV locally before upload.
 
 ```
-voicebox-cli transcribe <file> [options]
+npx voicebox-cli transcribe <file> [options]
 
 Options:
   -l, --language <language>  language hint (e.g. en, fr, ja)
@@ -279,28 +279,28 @@ Examples:
 
 ```bash
 # Simplest: audio file → transcript printed to stdout
-voicebox-cli transcribe outputs/take.wav
+npx voicebox-cli transcribe outputs/take.wav
 
 # MP3 (or any ffmpeg-readable format) is converted to WAV automatically
-voicebox-cli transcribe outputs/take.mp3
+npx voicebox-cli transcribe outputs/take.mp3
 
 # Give a language hint for better accuracy
-voicebox-cli transcribe outputs/take.wav --language en
+npx voicebox-cli transcribe outputs/take.wav --language en
 
 # Pick a specific transcription model
-voicebox-cli transcribe outputs/take.wav --model whisper-turbo
+npx voicebox-cli transcribe outputs/take.wav --model whisper-turbo
 
 # Get the raw JSON (includes the audio duration)
-voicebox-cli transcribe outputs/take.wav --json
+npx voicebox-cli transcribe outputs/take.wav --json
 
 # Save the transcript to a text file
-voicebox-cli transcribe outputs/take.wav > outputs/take.txt
+npx voicebox-cli transcribe outputs/take.wav > outputs/take.txt
 
 # Point at a server on another host/port
-voicebox-cli transcribe outputs/take.wav --base-url http://192.168.1.50:17493
+npx voicebox-cli transcribe outputs/take.wav --base-url http://192.168.1.50:17493
 
 # Using short flags
-voicebox-cli transcribe outputs/take.wav -l en -m whisper-turbo
+npx voicebox-cli transcribe outputs/take.wav -l en -m whisper-turbo
 ```
 
 ### `health`
@@ -308,7 +308,7 @@ voicebox-cli transcribe outputs/take.wav -l en -m whisper-turbo
 Report the API's status: whether the model is loaded, which backend and GPU are in use, and any compatibility warnings. Pass `-f`/`--filesystem` to instead check that the server's storage directories exist, are writable, and have free disk space. Add `--json` to print the raw response for scripting.
 
 ```
-voicebox-cli health [options]
+npx voicebox-cli health [options]
 
 Options:
   -f, --filesystem  check filesystem health instead
@@ -317,7 +317,7 @@ Options:
 ```
 
 ```bash
-$ voicebox-cli health
+$ npx voicebox-cli health
 status: healthy
 model: loaded (1.7B)
 gpu: MPS (Apple Silicon)
@@ -329,7 +329,7 @@ backend: mlx (cpu)
 Gracefully shut down the API server. Because this stops the process that serves every other command, it refuses to run unless you pass `--yes` to confirm. Point it at a specific server with `--base-url`.
 
 ```
-voicebox-cli shutdown [options]
+npx voicebox-cli shutdown [options]
 
 Options:
   -y, --yes         skip the confirmation prompt
@@ -337,7 +337,7 @@ Options:
 ```
 
 ```bash
-voicebox-cli shutdown --yes
+npx voicebox-cli shutdown --yes
 ```
 
 ### `watchdog`
@@ -345,7 +345,7 @@ voicebox-cli shutdown --yes
 Control the server's parent-process watchdog. By default the server shuts itself down when the process that launched it goes away; `watchdog disable` turns that off so the server keeps running on its own. This is useful when you started the server from a short-lived launcher but want it to persist.
 
 ```
-voicebox-cli watchdog disable [options]
+npx voicebox-cli watchdog disable [options]
 
 Options:
   --base-url <url>  API base url
