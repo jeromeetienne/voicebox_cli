@@ -148,6 +148,26 @@ voicebox-cli channels create "Living room" --device dev-1 --device dev-2
 voicebox-cli channels set-voices <channel-id> <profile-id-a> <profile-id-b>
 ```
 
+### `history`
+
+Browse and manage past generations. `list` supports filtering by profile and free-text search with pagination; `get` and `stats` inspect a single item or aggregate totals; `favorite`, `delete`, and `clear-failed` manage entries; and `export` / `export-audio` save a generation's archive or audio to disk.
+
+```
+voicebox-cli history list [-p <profile-id>] [-s <search>] [--limit <n>] [--offset <n>]
+voicebox-cli history get <id>
+voicebox-cli history stats
+voicebox-cli history favorite <id>
+voicebox-cli history delete <id>
+voicebox-cli history clear-failed
+voicebox-cli history export <id> [-o <path>]          # zip (default: outputs/<id>.zip)
+voicebox-cli history export-audio <id> [-o <path>]    # wav (default: outputs/<id>.wav)
+```
+
+```bash
+voicebox-cli history list --profile <profile-id> --search "hello" --limit 20
+voicebox-cli history export-audio <id> -o outputs/take.wav
+```
+
 ### `health`
 
 Report the API's status: whether the model is loaded, which backend and GPU are in use, and any compatibility warnings. Pass `-f`/`--filesystem` to instead check that the server's storage directories exist, are writable, and have free disk space. Add `--json` to print the raw response for scripting.
@@ -221,6 +241,7 @@ src/
     generate_command.ts   # `generate` command group
     profiles_command.ts   # `profiles` command group
     channels_command.ts   # `channels` command group
+    history_command.ts    # `history` command group
     health_command.ts     # `health` command
     shutdown_command.ts   # `shutdown` command
     watchdog_command.ts   # `watchdog` command
