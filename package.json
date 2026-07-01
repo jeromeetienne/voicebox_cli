@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"cli": "tsx src/cli.ts",
+		"test": "tsx --test test/*.test.ts",
 		"typecheck": "tsc -p tsconfig.json",
 		"build": "tsc -p tsconfig.build.json"
 	},

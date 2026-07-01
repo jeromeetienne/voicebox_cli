@@ -13,7 +13,7 @@ export type SpeakOptions = {
 	baseUrl?: string;
 };
 
-export class Speak {
+export class SpeakCommand {
 	static register(program: Command): void {
 		program
 			.command('speak')
@@ -26,7 +26,7 @@ export class Speak {
 			.option('--personality', 'rewrite the text in-character before TTS')
 			.option('--base-url <url>', 'API base url')
 			.action(async (text: string, options: SpeakOptions) => {
-				await Speak.run(text, options);
+				await SpeakCommand.run(text, options);
 			});
 	}
 

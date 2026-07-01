@@ -42,6 +42,44 @@ export type GenerationStatus = {
 	source: string;
 };
 
+export type VoiceProfile = {
+	id: string;
+	name: string;
+	description: string | null;
+	language: string;
+	avatar_path: string | null;
+	effects_chain: unknown[] | null;
+	voice_type: string;
+	preset_engine: string | null;
+	preset_voice_id: string | null;
+	design_prompt: string | null;
+	default_engine: string | null;
+	personality: string | null;
+	generation_count: number;
+	sample_count: number;
+	created_at: string;
+	updated_at: string;
+};
+
+export type VoiceProfileInput = {
+	name: string;
+	description?: string | null;
+	language?: string;
+	voice_type?: string | null;
+	preset_engine?: string | null;
+	preset_voice_id?: string | null;
+	design_prompt?: string | null;
+	default_engine?: string | null;
+	personality?: string | null;
+};
+
+export type ProfileSample = {
+	id: string;
+	profile_id: string;
+	audio_path: string;
+	reference_text: string;
+};
+
 export class VoiceboxClient {
 	private readonly baseUrl: string;
 
@@ -49,19 +87,107 @@ export class VoiceboxClient {
 		this.baseUrl = baseUrl.replace(/\/+$/, '');
 	}
 
-	async speak(request: SpeakRequest): Promise<GenerationResponse> {
-		const response = await fetch(`${this.baseUrl}/speak`, {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify(request),
-		});
-
+	private async requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+		const response = await fetch(`${this.baseUrl}${path}`, init);
 		if (response.ok === false) {
 			const detail = await response.text();
-			throw new Error(`speak failed (${response.status}): ${detail}`);
+			throw new Error(`${init?.method ?? 'GET'} ${path} failed (${response.status}): ${detail}`);
 		}
+		return (await response.json()) as T;
+	}
 
-		return (await response.json()) as GenerationResponse;
+	private async requestBytes(path: string, init?: RequestInit): Promise<Uint8Array> {
+		const response = await fetch(`${this.baseUrl}${path}`, init);
+		if (response.ok === false) {
+			const detail = await response.text();
+			throw new Error(`${init?.method ?? 'GET'} ${path} failed (${response.status}): ${detail}`);
+		}
+		return new Uint8Array(await response.arrayBuffer());
+	}
+
+	private async requestVoid(path: string, init?: RequestInit): Promise<void> {
+		const response = await fetch(`${this.baseUrl}${path}`, init);
+		if (response.ok === false) {
+			const detail = await response.text();
+			throw new Error(`${init?.method ?? 'GET'} ${path} failed (${response.status}): ${detail}`);
+		}
+	}
+
+	private jsonBody(body: unknown): RequestInit {
+		return {
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify(body),
+		};
+	}
+
+	async listProfiles(): Promise<VoiceProfile[]> {
+		return await this.requestJson<VoiceProfile[]>('/profiles');
+	}
+
+	async getProfile(profileId: string): Promise<VoiceProfile> {
+		return await this.requestJson<VoiceProfile>(`/profiles/${profileId}`);
+	}
+
+	async createProfile(input: VoiceProfileInput): Promise<VoiceProfile> {
+		return await this.requestJson<VoiceProfile>('/profiles', {
+			method: 'POST',
+			...this.jsonBody(input),
+		});
+	}
+
+	async updateProfile(profileId: string, input: VoiceProfileInput): Promise<VoiceProfile> {
+		return await this.requestJson<VoiceProfile>(`/profiles/${profileId}`, {
+			method: 'PUT',
+			...this.jsonBody(input),
+		});
+	}
+
+	async deleteProfile(profileId: string): Promise<void> {
+		await this.requestVoid(`/profiles/${profileId}`, { method: 'DELETE' });
+	}
+
+	async listPresetVoices(engine: string): Promise<unknown> {
+		return await this.requestJson<unknown>(`/profiles/presets/${engine}`);
+	}
+
+	async exportProfile(profileId: string): Promise<Uint8Array> {
+		return await this.requestBytes(`/profiles/${profileId}/export`);
+	}
+
+	async listProfileSamples(profileId: string): Promise<ProfileSample[]> {
+		return await this.requestJson<ProfileSample[]>(`/profiles/${profileId}/samples`);
+	}
+
+	async addProfileSample(
+		profileId: string,
+		file: { data: Uint8Array; filename: string },
+		referenceText: string,
+	): Promise<ProfileSample> {
+		const form = new FormData();
+		form.append('file', new Blob([file.data as BlobPart]), file.filename);
+		form.append('reference_text', referenceText);
+		return await this.requestJson<ProfileSample>(`/profiles/${profileId}/samples`, {
+			method: 'POST',
+			body: form,
+		});
+	}
+
+	async updateProfileSample(sampleId: string, referenceText: string): Promise<ProfileSample> {
+		return await this.requestJson<ProfileSample>(`/profiles/samples/${sampleId}`, {
+			method: 'PUT',
+			...this.jsonBody({ reference_text: referenceText }),
+		});
+	}
+
+	async deleteProfileSample(sampleId: string): Promise<void> {
+		await this.requestVoid(`/profiles/samples/${sampleId}`, { method: 'DELETE' });
+	}
+
+	async speak(request: SpeakRequest): Promise<GenerationResponse> {
+		return await this.requestJson<GenerationResponse>('/speak', {
+			method: 'POST',
+			...this.jsonBody(request),
+		});
 	}
 
 	async waitForCompletion(generationId: string): Promise<GenerationStatus> {
@@ -109,13 +235,6 @@ export class VoiceboxClient {
 	}
 
 	async downloadAudio(generationId: string): Promise<Uint8Array> {
-		const response = await fetch(`${this.baseUrl}/audio/${generationId}`);
-
-		if (response.ok === false) {
-			const detail = await response.text();
-			throw new Error(`downloadAudio failed (${response.status}): ${detail}`);
-		}
-
-		return new Uint8Array(await response.arrayBuffer());
+		return await this.requestBytes(`/audio/${generationId}`);
 	}
 }

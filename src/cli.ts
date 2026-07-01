@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { Speak } from './commands/speak.js';
+import { ProfilesCommand } from './commands/profiles_command.js';
+import { SpeakCommand } from './commands/speak_command.js';
 
 export class Cli {
 	static build(): Command {
@@ -9,7 +10,8 @@ export class Cli {
 			.description('Command-line client for the voicebox TTS API')
 			.version('0.1.0');
 
-		Speak.register(program);
+		SpeakCommand.register(program);
+		ProfilesCommand.register(program);
 
 		return program;
 	}
