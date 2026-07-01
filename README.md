@@ -34,6 +34,8 @@ npm run cli -- speak "Hello, world!" --profile Test --output outputs/hello.mp3
 
 ### `speak`
 
+Synthesize speech from text with a chosen voice profile and save it to a file. The command submits the text to the API, waits for the asynchronous generation to complete, downloads the resulting audio, and writes it locally. Pick the voice with `--profile`, steer synthesis with `--language` and `--engine`, and use `--personality` to rewrite the text in the profile's character before it is spoken.
+
 ```
 voicebox-cli speak <text> [options]
 
@@ -51,7 +53,7 @@ The output format is chosen from the file extension: `.mp3` transcodes via `ffmp
 
 ### `profiles`
 
-Manage voice profiles and their reference samples.
+Create, inspect, and delete the voice profiles that `speak` uses, and manage the reference samples a cloned voice is built from. A profile bundles a voice's language, engine defaults, and an optional personality prompt; samples are short audio clips plus their transcripts that teach the clone how the voice sounds. `update` merges your changes with the profile's current values, so you only pass the fields you want to change.
 
 ```
 voicebox-cli profiles <subcommand> [options]
@@ -97,7 +99,7 @@ voicebox-cli speak "Hello there" --profile Narrator -o outputs/hello.mp3
 
 ### `channels`
 
-Manage audio output channels and their assigned voice profiles.
+Manage audio output channels and the voices assigned to them. A channel is a named output route that binds a set of audio devices to a set of voice profiles, letting the server play different voices through different speakers. Use these subcommands to create channels, attach output devices, and control which profiles belong to each one.
 
 ```
 voicebox-cli channels <subcommand> [options]
@@ -119,6 +121,8 @@ voicebox-cli channels set-voices <channel-id> <profile-id-a> <profile-id-b>
 
 ### `health`
 
+Report the API's status: whether the model is loaded, which backend and GPU are in use, and any compatibility warnings. Pass `-f`/`--filesystem` to instead check that the server's storage directories exist, are writable, and have free disk space. Add `--json` to print the raw response for scripting.
+
 ```
 voicebox-cli health [options]
 
@@ -138,7 +142,7 @@ backend: mlx (cpu)
 
 ### `shutdown`
 
-Gracefully shuts down the API server. Requires `--yes` to confirm, since it stops the running server.
+Gracefully shut down the API server. Because this stops the process that serves every other command, it refuses to run unless you pass `--yes` to confirm. Point it at a specific server with `--base-url`.
 
 ```
 voicebox-cli shutdown [options]
@@ -154,7 +158,7 @@ voicebox-cli shutdown --yes
 
 ### `watchdog`
 
-Disable the parent-process watchdog so the server keeps running after the process that launched it exits.
+Control the server's parent-process watchdog. By default the server shuts itself down when the process that launched it goes away; `watchdog disable` turns that off so the server keeps running on its own. This is useful when you started the server from a short-lived launcher but want it to persist.
 
 ```
 voicebox-cli watchdog disable [options]
