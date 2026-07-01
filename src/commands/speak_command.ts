@@ -4,6 +4,7 @@ import { AudioConvert } from '../misc/audio_convert.js';
 import type { SpeakEngine, SpeakLanguage } from '../misc/voicebox_client.js';
 import { VoiceboxClient } from '../misc/voicebox_client.js';
 
+/** Options accepted by the `speak` command. */
 export type SpeakOptions = {
 	profile?: string;
 	output: string;
@@ -13,7 +14,9 @@ export type SpeakOptions = {
 	baseUrl?: string;
 };
 
+/** Generate speech from text and save it as an audio file. */
 export class SpeakCommand {
+	/** Register the `speak` command on the given Commander program. */
 	static register(program: Command): void {
 		program
 			.command('speak')
@@ -30,6 +33,11 @@ export class SpeakCommand {
 			});
 	}
 
+	/**
+	 * Send the synthesis request, wait for it to complete, download the WAV
+	 * audio, transcode it to MP3 when the output path ends in `.mp3`, and write
+	 * the result to the output file.
+	 */
 	static async run(text: string, options: SpeakOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 

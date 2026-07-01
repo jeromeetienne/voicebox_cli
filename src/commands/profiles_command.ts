@@ -4,10 +4,12 @@ import type { Command } from 'commander';
 import type { VoiceProfileInput } from '../misc/voicebox_client.js';
 import { VoiceboxClient } from '../misc/voicebox_client.js';
 
+/** Options shared by every profiles subcommand. */
 type GlobalOptions = {
 	baseUrl?: string;
 };
 
+/** Options for the `create` and `update` subcommands. */
 type CreateOptions = GlobalOptions & {
 	description?: string;
 	language?: string;
@@ -19,7 +21,9 @@ type CreateOptions = GlobalOptions & {
 	personality?: string;
 };
 
+/** Manage voice profiles and their reference samples. */
 export class ProfilesCommand {
+	/** Register the `profiles` command group on the given Commander program. */
 	static register(program: Command): void {
 		const profiles = program
 			.command('profiles')
@@ -149,6 +153,7 @@ export class ProfilesCommand {
 			});
 	}
 
+	/** Print every profile as `id  name  (language, N samples)` (`GET /profiles`). */
 	static async list(options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const profiles = await client.listProfiles();
@@ -157,17 +162,23 @@ export class ProfilesCommand {
 		}
 	}
 
+	/** Print a single profile as pretty JSON (`GET /profiles/{id}`). */
 	static async get(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		console.log(JSON.stringify(await client.getProfile(id), null, 2));
 	}
 
+	/** Create a profile from the CLI options (`POST /profiles`). */
 	static async create(name: string, options: CreateOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const profile = await client.createProfile(ProfilesCommand.toInput(name, options));
 		console.log(`created profile ${profile.id} (${profile.name})`);
 	}
 
+	/**
+	 * Update a profile. Fetches the current profile, merges the provided
+	 * options over it, then sends a full replacement (`PUT /profiles/{id}`).
+	 */
 	static async update(id: string, options: CreateOptions & { name?: string }): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const current = await client.getProfile(id);
@@ -186,17 +197,20 @@ export class ProfilesCommand {
 		console.log(`updated profile ${profile.id} (${profile.name})`);
 	}
 
+	/** Delete a profile (`DELETE /profiles/{id}`). */
 	static async delete(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		await client.deleteProfile(id);
 		console.log(`deleted profile ${id}`);
 	}
 
+	/** Print an engine's preset voices as JSON (`GET /profiles/presets/{engine}`). */
 	static async presets(engine: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		console.log(JSON.stringify(await client.listPresetVoices(engine), null, 2));
 	}
 
+	/** Download a profile's zip export and write it to `options.output` (`GET /profiles/{id}/export`). */
 	static async export(id: string, options: GlobalOptions & { output: string }): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const bytes = await client.exportProfile(id);
@@ -204,6 +218,7 @@ export class ProfilesCommand {
 		console.log(`wrote ${bytes.byteLength} bytes to ${options.output}`);
 	}
 
+	/** Print a profile's samples as `id  reference_text` (`GET /profiles/{id}/samples`). */
 	static async listSamples(profileId: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const samples = await client.listProfileSamples(profileId);
@@ -212,6 +227,13 @@ export class ProfilesCommand {
 		}
 	}
 
+	/**
+	 * Read an audio file and attach it as a reference sample
+	 * (`POST /profiles/{id}/samples`).
+	 *
+	 * @param file Path to the audio file to upload.
+	 * @param referenceText Transcript of the sample audio.
+	 */
 	static async addSample(
 		profileId: string,
 		file: string,
@@ -228,18 +250,25 @@ export class ProfilesCommand {
 		console.log(`added sample ${sample.id} to profile ${profileId}`);
 	}
 
+	/**
+	 * Replace a sample's transcript (`PUT /profiles/samples/{id}`).
+	 *
+	 * @param referenceText New transcript for the sample.
+	 */
 	static async updateSample(sampleId: string, referenceText: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const sample = await client.updateProfileSample(sampleId, referenceText);
 		console.log(`updated sample ${sample.id}`);
 	}
 
+	/** Delete a reference sample (`DELETE /profiles/samples/{id}`). */
 	static async deleteSample(sampleId: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		await client.deleteProfileSample(sampleId);
 		console.log(`deleted sample ${sampleId}`);
 	}
 
+	/** Map a name and CLI options into a `VoiceProfileInput` payload. */
 	private static toInput(name: string, options: CreateOptions): VoiceProfileInput {
 		return {
 			name,

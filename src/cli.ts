@@ -10,11 +10,21 @@ import { ShutdownCommand } from './commands/shutdown_command.js';
 import { SpeakCommand } from './commands/speak_command.js';
 import { WatchdogCommand } from './commands/watchdog_command.js';
 
+/** Minimal shape of the fields read from `package.json`. */
 type PackageJson = {
 	version: string;
 };
 
+/** Entry point that assembles the `voicebox-cli` command tree. */
 export class Cli {
+	/**
+	 * Build the root Commander program with every command registered.
+	 *
+	 * The version reported by `-V`/`--version` is read from `package.json`
+	 * at runtime (resolved relative to the compiled module).
+	 *
+	 * @returns The configured Commander program, ready to `parseAsync`.
+	 */
 	static build(): Command {
 		const packageJson = JSON.parse(
 			readFileSync(new URL('../package.json', import.meta.url), 'utf8'),

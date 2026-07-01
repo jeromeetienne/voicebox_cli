@@ -1,13 +1,16 @@
 import type { Command } from 'commander';
 import { VoiceboxClient } from '../misc/voicebox_client.js';
 
+/** Options accepted by the `health` command. */
 type HealthOptions = {
 	filesystem?: boolean;
 	json?: boolean;
 	baseUrl?: string;
 };
 
+/** Check the API health status, optionally the filesystem health. */
 export class HealthCommand {
+	/** Register the `health` command on the given Commander program. */
 	static register(program: Command): void {
 		program
 			.command('health')
@@ -20,6 +23,11 @@ export class HealthCommand {
 			});
 	}
 
+	/**
+	 * Query the API and print its health. With `-f/--filesystem` it reports
+	 * filesystem health (disk space and per-directory status) instead of model
+	 * and GPU status. With `--json` it prints the raw response and returns early.
+	 */
 	static async run(options: HealthOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 

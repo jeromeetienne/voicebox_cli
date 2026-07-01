@@ -2,10 +2,12 @@ import { writeFile } from 'node:fs/promises';
 import type { Command } from 'commander';
 import { VoiceboxClient } from '../misc/voicebox_client.js';
 
+/** Options shared by every history subcommand. */
 type GlobalOptions = {
 	baseUrl?: string;
 };
 
+/** Options for the `list` subcommand: filters and pagination. */
 type ListOptions = GlobalOptions & {
 	profile?: string;
 	search?: string;
@@ -13,10 +15,12 @@ type ListOptions = GlobalOptions & {
 	offset?: number;
 };
 
+/** Options for the `export` and `export-audio` subcommands. */
 type ExportOptions = GlobalOptions & {
 	output?: string;
 };
 
+/** Parse a CLI string as an integer, throwing on non-numeric input. */
 function toInt(value: string): number {
 	const parsed = Number.parseInt(value, 10);
 	if (Number.isNaN(parsed) === true) {
@@ -25,7 +29,9 @@ function toInt(value: string): number {
 	return parsed;
 }
 
+/** Browse and manage generation history. */
 export class HistoryCommand {
+	/** Register the `history` command group on the given Commander program. */
 	static register(program: Command): void {
 		const history = program
 			.command('history')
@@ -107,6 +113,7 @@ export class HistoryCommand {
 			});
 	}
 
+	/** Print one line per generation plus a shown/total footer (`GET /history`). */
 	static async list(options: ListOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const history = await client.listHistory({
@@ -123,34 +130,43 @@ export class HistoryCommand {
 		console.log(`${history.items.length} shown / ${history.total} total`);
 	}
 
+	/** Print a single generation as pretty JSON (`GET /history/{id}`). */
 	static async get(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		console.log(JSON.stringify(await client.getHistory(id), null, 2));
 	}
 
+	/** Print aggregate generation statistics as JSON (`GET /history/stats`). */
 	static async stats(options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		console.log(JSON.stringify(await client.historyStats(), null, 2));
 	}
 
+	/** Toggle a generation's favorite flag (`POST /history/{id}/favorite`). */
 	static async favorite(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		await client.toggleFavorite(id);
 		console.log(`toggled favorite for ${id}`);
 	}
 
+	/** Delete a generation (`DELETE /history/{id}`). */
 	static async delete(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		await client.deleteHistory(id);
 		console.log(`deleted ${id}`);
 	}
 
+	/** Delete all failed generations (`DELETE /history/failed`). */
 	static async clearFailed(options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		await client.clearFailedHistory();
 		console.log('cleared failed generations');
 	}
 
+	/**
+	 * Download a generation's zip export and write it to
+	 * `options.output` (default `outputs/<id>.zip`) (`GET /history/{id}/export`).
+	 */
 	static async export(id: string, options: ExportOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const output = options.output ?? `outputs/${id}.zip`;
@@ -159,6 +175,10 @@ export class HistoryCommand {
 		console.log(`wrote ${bytes.byteLength} bytes to ${output}`);
 	}
 
+	/**
+	 * Download a generation's audio and write it to `options.output`
+	 * (default `outputs/<id>.wav`) (`GET /history/{id}/export-audio`).
+	 */
 	static async exportAudio(id: string, options: ExportOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const output = options.output ?? `outputs/${id}.wav`;

@@ -3,10 +3,12 @@ import type { Command } from 'commander';
 import { AudioConvert } from '../misc/audio_convert.js';
 import { VoiceboxClient } from '../misc/voicebox_client.js';
 
+/** Options shared by every `generate` subcommand. */
 type GlobalOptions = {
 	baseUrl?: string;
 };
 
+/** Options for `generate run`. */
 type RunOptions = GlobalOptions & {
 	output: string;
 	language?: string;
@@ -20,6 +22,7 @@ type RunOptions = GlobalOptions & {
 	normalize?: boolean;
 };
 
+/** Parse a CLI string as a base-10 integer, throwing on non-numeric input. */
 function toInt(value: string): number {
 	const parsed = Number.parseInt(value, 10);
 	if (Number.isNaN(parsed) === true) {
@@ -28,7 +31,9 @@ function toInt(value: string): number {
 	return parsed;
 }
 
+/** CLI for low-level speech generation with full control over the request. */
 export class GenerateCommand {
+	/** Register the `generate` command group on the given Commander program. */
 	static register(program: Command): void {
 		const generate = program
 			.command('generate')
@@ -91,6 +96,12 @@ export class GenerateCommand {
 			});
 	}
 
+	/**
+	 * Generate speech (`POST /generate`), wait for completion, then save the
+	 * audio to `options.output` (transcoding to MP3 when the path ends in `.mp3`).
+	 *
+	 * @param text Text to synthesize.
+	 */
 	static async run(profileId: string, text: string, options: RunOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 
@@ -123,24 +134,28 @@ export class GenerateCommand {
 		console.log(`wrote ${audio.byteLength} bytes to ${options.output} (${final.duration}s)`);
 	}
 
+	/** Retry a failed generation (`POST /generate/{id}/retry`). */
 	static async retry(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const generation = await client.retryGeneration(id);
 		console.log(`retry queued ${generation.id} (status: ${generation.status})`);
 	}
 
+	/** Regenerate a generation from scratch (`POST /generate/{id}/regenerate`). */
 	static async regenerate(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const generation = await client.regenerateGeneration(id);
 		console.log(`regenerate queued ${generation.id} (status: ${generation.status})`);
 	}
 
+	/** Cancel an in-progress generation (`POST /generate/{id}/cancel`). */
 	static async cancel(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		await client.cancelGeneration(id);
 		console.log(`cancelled ${id}`);
 	}
 
+	/** Wait for a generation to finish and print its terminal status (`GET /generate/{id}/status`). */
 	static async status(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const status = await client.waitForCompletion(id);

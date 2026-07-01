@@ -1,12 +1,15 @@
 import type { Command } from 'commander';
 import { VoiceboxClient } from '../misc/voicebox_client.js';
 
+/** Options for the `shutdown` command. */
 type ShutdownOptions = {
 	yes?: boolean;
 	baseUrl?: string;
 };
 
+/** Gracefully shut down the API server. */
 export class ShutdownCommand {
+	/** Register the `shutdown` command on the given Commander program. */
 	static register(program: Command): void {
 		program
 			.command('shutdown')
@@ -18,6 +21,7 @@ export class ShutdownCommand {
 			});
 	}
 
+	/** Refuse to proceed and throw unless `options.yes` is true, then POST the shutdown request. */
 	static async run(options: ShutdownOptions): Promise<void> {
 		if (options.yes !== true) {
 			throw new Error('refusing to shut down without confirmation; pass --yes to proceed');

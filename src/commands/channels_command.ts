@@ -2,20 +2,25 @@ import type { Command } from 'commander';
 import type { AudioChannelInput } from '../misc/voicebox_client.js';
 import { VoiceboxClient } from '../misc/voicebox_client.js';
 
+/** Options shared by every `channels` subcommand. */
 type GlobalOptions = {
 	baseUrl?: string;
 };
 
+/** Options for `channels create`. */
 type CreateOptions = GlobalOptions & {
 	device?: string[];
 };
 
+/** Options for `channels update`. */
 type UpdateOptions = GlobalOptions & {
 	name?: string;
 	device?: string[];
 };
 
+/** CLI for managing audio output channels that route voices to devices. */
 export class ChannelsCommand {
+	/** Register the `channels` command group on the given Commander program. */
 	static register(program: Command): void {
 		const channels = program
 			.command('channels')
@@ -88,6 +93,7 @@ export class ChannelsCommand {
 			});
 	}
 
+	/** List all channels with a summary of each (`GET /channels`). */
 	static async list(options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const channels = await client.listChannels();
@@ -97,17 +103,20 @@ export class ChannelsCommand {
 		}
 	}
 
+	/** Print a single channel as JSON (`GET /channels/{id}`). */
 	static async get(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		console.log(JSON.stringify(await client.getChannel(id), null, 2));
 	}
 
+	/** Create a channel with the given name and output devices (`POST /channels`). */
 	static async create(name: string, options: CreateOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const channel = await client.createChannel(name, options.device ?? []);
 		console.log(`created channel ${channel.id} (${channel.name})`);
 	}
 
+	/** Update a channel's name and/or device set (`PUT /channels/{id}`). */
 	static async update(id: string, options: UpdateOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		const input: AudioChannelInput = {
@@ -118,17 +127,20 @@ export class ChannelsCommand {
 		console.log(`updated channel ${channel.id} (${channel.name})`);
 	}
 
+	/** Delete a channel (`DELETE /channels/{id}`). */
 	static async delete(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		await client.deleteChannel(id);
 		console.log(`deleted channel ${id}`);
 	}
 
+	/** Print the voice profiles assigned to a channel as JSON (`GET /channels/{id}/voices`). */
 	static async voices(id: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		console.log(JSON.stringify(await client.getChannelVoices(id), null, 2));
 	}
 
+	/** Replace the set of voice profiles assigned to a channel (`PUT /channels/{id}/voices`). */
 	static async setVoices(id: string, profileIds: string[], options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		await client.setChannelVoices(id, profileIds);

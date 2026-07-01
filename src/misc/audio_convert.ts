@@ -1,9 +1,22 @@
 import { spawn } from 'node:child_process';
 import ffmpegStatic from 'ffmpeg-static';
 
+/** Path to the bundled ffmpeg binary, or `null` if none ships for this platform. */
 const ffmpegPath = ffmpegStatic as unknown as string | null;
 
+/** Audio transcoding helpers backed by the bundled `ffmpeg-static` binary. */
 export class AudioConvert {
+	/**
+	 * Transcode WAV audio to MP3 using the bundled ffmpeg binary.
+	 *
+	 * The WAV bytes are piped to ffmpeg's stdin and the encoded MP3 is read
+	 * back from stdout, so nothing touches the filesystem.
+	 *
+	 * @param wav Raw WAV audio bytes.
+	 * @param bitrate Target MP3 bitrate (e.g. `'192k'`).
+	 * @returns The encoded MP3 bytes.
+	 * @throws If no ffmpeg binary is available or ffmpeg exits non-zero.
+	 */
 	static async wavToMp3(wav: Uint8Array, bitrate = '192k'): Promise<Uint8Array> {
 		if (ffmpegPath === null) {
 			throw new Error('ffmpeg-static did not provide a binary for this platform');
