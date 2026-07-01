@@ -26,10 +26,10 @@ voicebox-cli speak "Hello, world!" --profile Test --output hello.mp3
 
 ## Usage
 
-Once installed, the `voicebox-cli` binary is available. During development, run it from source via the `cli` script (uses `tsx`, no build step needed):
+Once installed, the `voicebox-cli` binary is available. Run any command through `npx`:
 
 ```bash
-npm run cli -- speak "Hello, world!" --profile Test --output outputs/hello.mp3
+npx voicebox-cli speak "Hello, world!" --profile Test --output outputs/hello.mp3
 ```
 
 ### `speak`
