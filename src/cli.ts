@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { Command } from 'commander';
 import { ChannelsCommand } from './commands/channels_command.js';
+import { GenerateCommand } from './commands/generate_command.js';
 import { HealthCommand } from './commands/health_command.js';
 import { ProfilesCommand } from './commands/profiles_command.js';
 import { ShutdownCommand } from './commands/shutdown_command.js';
@@ -25,6 +26,7 @@ export class Cli {
 			.version(packageJson.version, '-V, --version', 'output the version from package.json');
 
 		SpeakCommand.register(program);
+		GenerateCommand.register(program);
 		ProfilesCommand.register(program);
 		ChannelsCommand.register(program);
 		HealthCommand.register(program);

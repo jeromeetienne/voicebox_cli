@@ -57,6 +57,21 @@ test('createProfile sends a JSON POST body', async () => {
 	assert.deepEqual(JSON.parse(String(init?.body)), { name: 'Bob', language: 'fr' });
 });
 
+test('generate posts the full request to /generate', async () => {
+	const calls = stubFetch(() => new Response(JSON.stringify({ id: 'g1', status: 'generating' }), { status: 200 }));
+	await new VoiceboxClient('http://example.test').generate({ profile_id: 'p1', text: 'hi', seed: 42 });
+	assert.equal(calls[0].url, 'http://example.test/generate');
+	assert.equal(calls[0].init?.method, 'POST');
+	assert.deepEqual(JSON.parse(String(calls[0].init?.body)), { profile_id: 'p1', text: 'hi', seed: 42 });
+});
+
+test('cancelGeneration POSTs to the cancel endpoint', async () => {
+	const calls = stubFetch(() => new Response(null, { status: 200 }));
+	await new VoiceboxClient('http://example.test').cancelGeneration('g1');
+	assert.equal(calls[0].url, 'http://example.test/generate/g1/cancel');
+	assert.equal(calls[0].init?.method, 'POST');
+});
+
 test('createChannel posts name and device_ids', async () => {
 	const calls = stubFetch(() => new Response(JSON.stringify({ id: 'c1', name: 'Room' }), { status: 200 }));
 	await new VoiceboxClient('http://example.test').createChannel('Room', ['dev-1']);

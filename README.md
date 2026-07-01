@@ -51,6 +51,35 @@ Options:
 
 The output format is chosen from the file extension: `.mp3` transcodes via `ffmpeg-static`, anything else writes the raw WAV returned by the API.
 
+### `generate`
+
+The low-level counterpart to `speak`. It targets a profile by **id** (not name) and exposes the full generation request: seed, instruction/style prompt, model size, engine, chunking for long text, crossfade, and volume normalization. It also manages the lifecycle of an existing generation — retry a failed one, regenerate from scratch, cancel an in-progress job, or wait on its status.
+
+```
+voicebox-cli generate run <profile-id> <text> [options]
+voicebox-cli generate retry <id>
+voicebox-cli generate regenerate <id>
+voicebox-cli generate cancel <id>
+voicebox-cli generate status <id>
+
+run options:
+  -o, --output <path>    output file (.mp3 or .wav)   (default: outputs/generation.mp3)
+  -l, --language <code>  language code                (default: en)
+  --seed <n>             random seed
+  --model-size <size>    model size (e.g. 1.7B)
+  --instruct <text>      instruction / style prompt
+  -e, --engine <engine>  TTS engine
+  --personality          rewrite the text in-character before TTS
+  --max-chunk-chars <n>  max characters per chunk for long text
+  --crossfade-ms <n>     crossfade between chunks in ms
+  --no-normalize         do not normalize output volume
+  --base-url <url>       API base url
+```
+
+```bash
+voicebox-cli generate run <profile-id> "A precise, reproducible take." --seed 42 -o outputs/take.wav
+```
+
 ### `profiles`
 
 Create, inspect, and delete the voice profiles that `speak` uses, and manage the reference samples a cloned voice is built from. A profile bundles a voice's language, engine defaults, and an optional personality prompt; samples are short audio clips plus their transcripts that teach the clone how the voice sounds. `update` merges your changes with the profile's current values, so you only pass the fields you want to change.
@@ -189,6 +218,7 @@ src/
   cli.ts                  # Commander entry point
   commands/
     speak_command.ts      # `speak` command
+    generate_command.ts   # `generate` command group
     profiles_command.ts   # `profiles` command group
     channels_command.ts   # `channels` command group
     health_command.ts     # `health` command

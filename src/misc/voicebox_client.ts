@@ -34,6 +34,21 @@ export type GenerationResponse = {
 	created_at: string;
 };
 
+export type GenerationRequest = {
+	profile_id: string;
+	text: string;
+	language?: string;
+	seed?: number | null;
+	model_size?: string | null;
+	instruct?: string | null;
+	engine?: string | null;
+	personality?: boolean;
+	max_chunk_chars?: number;
+	crossfade_ms?: number;
+	normalize?: boolean;
+	effects_chain?: unknown[] | null;
+};
+
 export type GenerationStatus = {
 	id: string;
 	status: string;
@@ -274,6 +289,29 @@ export class VoiceboxClient {
 
 	async deleteProfileSample(sampleId: string): Promise<void> {
 		await this.requestVoid(`/profiles/samples/${sampleId}`, { method: 'DELETE' });
+	}
+
+	async generate(request: GenerationRequest): Promise<GenerationResponse> {
+		return await this.requestJson<GenerationResponse>('/generate', {
+			method: 'POST',
+			...this.jsonBody(request),
+		});
+	}
+
+	async retryGeneration(generationId: string): Promise<GenerationResponse> {
+		return await this.requestJson<GenerationResponse>(`/generate/${generationId}/retry`, {
+			method: 'POST',
+		});
+	}
+
+	async regenerateGeneration(generationId: string): Promise<GenerationResponse> {
+		return await this.requestJson<GenerationResponse>(`/generate/${generationId}/regenerate`, {
+			method: 'POST',
+		});
+	}
+
+	async cancelGeneration(generationId: string): Promise<void> {
+		await this.requestVoid(`/generate/${generationId}/cancel`, { method: 'POST' });
 	}
 
 	async speak(request: SpeakRequest): Promise<GenerationResponse> {
