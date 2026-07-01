@@ -1,0 +1,94 @@
+# voicebox-cli
+
+A small TypeScript command-line client for the [voicebox](http://127.0.0.1:17493) TTS API. It generates speech from text, waits for the async job to finish, downloads the audio, and optionally transcodes it to MP3 or Opus.
+
+## Requirements
+
+- Node.js 20+ (developed on v24)
+- A running voicebox API (defaults to `http://127.0.0.1:17493`)
+
+`ffmpeg` is **not** required on your system — the bundled [`ffmpeg-static`](https://www.npmjs.com/package/ffmpeg-static) binary is used for transcoding.
+
+## Install
+
+```bash
+npm install
+```
+
+## Usage
+
+Run the CLI via the `cli` script (uses `tsx`, no build step needed):
+
+```bash
+npm run cli -- speak "Hello, world!" --profile Test --output outputs/hello.mp3
+```
+
+### `speak`
+
+```
+voicebox speak <text> [options]
+
+Options:
+  -p, --profile <profile>    voice profile name or id
+  -o, --output <path>        output file (.mp3 or .wav)      (default: speech.mp3)
+  -e, --engine <engine>      TTS engine
+  -l, --language <language>  language code (e.g. en, fr, ja)
+  --personality              rewrite the text in-character before TTS
+  --base-url <url>           API base url
+  -h, --help                 display help for command
+```
+
+The output format is chosen from the file extension: `.mp3` transcodes via `ffmpeg-static`, anything else writes the raw WAV returned by the API.
+
+## Output formats
+
+The API serves WAV; the CLI transcodes locally.
+
+| Extension | Codec | Notes |
+| --- | --- | --- |
+| `.wav` | PCM | Uncompressed, universal |
+| `.mp3` | libmp3lame | Small, widely supported |
+
+For a royalty-free, WhatsApp/Chromium-friendly format, transcode to Opus with the bundled binary:
+
+```bash
+node_modules/ffmpeg-static/ffmpeg -i outputs/speech.mp3 -c:a libopus -b:a 96k outputs/speech.ogg
+```
+
+## Project layout
+
+```
+src/
+  cli.ts                  # Commander entry point
+  commands/
+    speak.ts              # `speak` command
+  misc/
+    voicebox-client.ts    # VoiceboxClient — /speak, status stream, audio download
+    audio-convert.ts      # AudioConvert — WAV → MP3 via ffmpeg-static
+examples/
+  generate-speech.ts      # library usage without the CLI
+outputs/                  # generated audio (git-ignored)
+```
+
+## Programmatic use
+
+```ts
+import { VoiceboxClient } from './src/misc/voicebox-client.js';
+
+const client = new VoiceboxClient();
+const generation = await client.speak({ text: 'Hello', profile: 'Test' });
+const final = await client.waitForCompletion(generation.id);
+const wav = await client.downloadAudio(final.id);
+```
+
+## Scripts
+
+```bash
+npm run cli        # run the CLI
+npm run typecheck  # tsc against tsconfig.json
+npm run build      # emit dist/ via tsconfig.build.json
+```
+
+## License
+
+[MIT](LICENSE)
