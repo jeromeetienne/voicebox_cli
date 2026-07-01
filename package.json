@@ -15,12 +15,12 @@
 	"bin": {
 		"voicebox": "dist/cli.js"
 	},
-	"main": "dist/misc/voicebox-client.js",
-	"types": "dist/misc/voicebox-client.d.ts",
+	"main": "dist/misc/voicebox_client.js",
+	"types": "dist/misc/voicebox_client.d.ts",
 	"exports": {
 		".": {
-			"types": "./dist/misc/voicebox-client.d.ts",
-			"import": "./dist/misc/voicebox-client.js"
+			"types": "./dist/misc/voicebox_client.d.ts",
+			"import": "./dist/misc/voicebox_client.js"
 		}
 	},
 	"files": [

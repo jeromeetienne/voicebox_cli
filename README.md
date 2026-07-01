@@ -70,19 +70,20 @@ node_modules/ffmpeg-static/ffmpeg -i outputs/speech.mp3 -c:a libopus -b:a 96k ou
 src/
   cli.ts                  # Commander entry point
   commands/
-    speak.ts              # `speak` command
+    speak_command.ts      # `speak` command
+    profiles_command.ts   # `profiles` command group
   misc/
-    voicebox-client.ts    # VoiceboxClient — /speak, status stream, audio download
-    audio-convert.ts      # AudioConvert — WAV → MP3 via ffmpeg-static
+    voicebox_client.ts    # VoiceboxClient — /speak, /profiles, status stream, audio download
+    audio_convert.ts      # AudioConvert — WAV → MP3 via ffmpeg-static
 examples/
-  generate-speech.ts      # library usage without the CLI
+  generate_speech.ts      # library usage without the CLI
 outputs/                  # generated audio (git-ignored)
 ```
 
 ## Programmatic use
 
 ```ts
-import { VoiceboxClient } from './src/misc/voicebox-client.js';
+import { VoiceboxClient } from './src/misc/voicebox_client.js';
 
 const client = new VoiceboxClient();
 const generation = await client.speak({ text: 'Hello', profile: 'Test' });

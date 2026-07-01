@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { AudioConvert } from '../src/misc/audio-convert.js';
+import { AudioConvert } from '../src/misc/audio_convert.js';
 
 function silenceWav(seconds = 0.1, sampleRate = 8000): Uint8Array {
 	const numSamples = Math.floor(seconds * sampleRate);

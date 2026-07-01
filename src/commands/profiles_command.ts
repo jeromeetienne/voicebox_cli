@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import type { Command } from 'commander';
-import type { VoiceProfileInput } from '../misc/voicebox-client.js';
-import { VoiceboxClient } from '../misc/voicebox-client.js';
+import type { VoiceProfileInput } from '../misc/voicebox_client.js';
+import { VoiceboxClient } from '../misc/voicebox_client.js';
 
 type GlobalOptions = {
 	baseUrl?: string;

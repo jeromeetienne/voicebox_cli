@@ -1,8 +1,8 @@
 import { writeFile } from 'node:fs/promises';
 import type { Command } from 'commander';
-import { AudioConvert } from '../misc/audio-convert.js';
-import type { SpeakEngine, SpeakLanguage } from '../misc/voicebox-client.js';
-import { VoiceboxClient } from '../misc/voicebox-client.js';
+import { AudioConvert } from '../misc/audio_convert.js';
+import type { SpeakEngine, SpeakLanguage } from '../misc/voicebox_client.js';
+import { VoiceboxClient } from '../misc/voicebox_client.js';
 
 export type SpeakOptions = {
 	profile?: string;

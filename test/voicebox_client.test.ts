@@ -1,6 +1,6 @@
 import { afterEach, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VoiceboxClient } from '../src/misc/voicebox-client.js';
+import { VoiceboxClient } from '../src/misc/voicebox_client.js';
 
 type FetchCall = { url: string; init: RequestInit | undefined };
 
