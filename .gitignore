@@ -1,8 +1,10 @@
 node_modules/
+dist/
+data/
+.DS_Store
 *.log
 
-# generated audio (kept for examples/)
+# generated audio
 *.wav
 *.mp3
-!examples/*.wav
-!examples/*.mp3
+*.ogg

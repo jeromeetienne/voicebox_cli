@@ -1,9 +1,16 @@
 import { spawn } from 'node:child_process';
+import ffmpegStatic from 'ffmpeg-static';
+
+const ffmpegPath = ffmpegStatic as unknown as string | null;
 
 export class AudioConvert {
 	static async wavToMp3(wav: Uint8Array, bitrate = '192k'): Promise<Uint8Array> {
+		if (ffmpegPath === null) {
+			throw new Error('ffmpeg-static did not provide a binary for this platform');
+		}
+
 		return await new Promise((resolve, reject) => {
-			const ffmpeg = spawn('ffmpeg', [
+			const ffmpeg = spawn(ffmpegPath, [
 				'-hide_banner',
 				'-loglevel', 'error',
 				'-f', 'wav',

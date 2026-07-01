@@ -1,11 +1,11 @@
 import { writeFile } from 'node:fs/promises';
-import { AudioConvert } from '../src/audio-convert.js';
-import { VoiceboxClient } from '../src/voicebox-client.js';
+import { AudioConvert } from '../src/misc/audio-convert.js';
+import { VoiceboxClient } from '../src/misc/voicebox-client.js';
 
 async function main(): Promise<void> {
 	const text = process.argv[2] ?? 'Hello from the voicebox client.';
 	const profile = process.argv[3] ?? 'Test';
-	const output = process.argv[4] ?? 'speech.mp3';
+	const output = process.argv[4] ?? 'outputs/speech.mp3';
 
 	const client = new VoiceboxClient();
 
