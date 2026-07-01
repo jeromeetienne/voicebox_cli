@@ -49,6 +49,52 @@ Options:
 
 The output format is chosen from the file extension: `.mp3` transcodes via `ffmpeg-static`, anything else writes the raw WAV returned by the API.
 
+### `profiles`
+
+Manage voice profiles and their reference samples.
+
+```
+voicebox-cli profiles <subcommand> [options]
+
+Subcommands:
+  list                              list all profiles
+  get <id>                          show a single profile (JSON)
+  create <name> [options]           create a profile
+  update <id> [options]             update a profile (merges with current values)
+  delete <id>                       delete a profile
+  presets <engine>                  list preset voices for an engine
+  export <id> [-o <path>]           export a profile to a file (default: outputs/profile.zip)
+  samples list <profile-id>         list a profile's reference samples
+  samples add <profile-id> <file> <reference-text>   add a sample from an audio file
+  samples update <sample-id> <reference-text>         change a sample's transcript
+  samples delete <sample-id>        delete a sample
+```
+
+`create` / `update` options:
+
+```
+  -n, --name <name>            profile name (update only)
+  -d, --description <text>     description
+  -l, --language <code>        language code (default: en)
+  --voice-type <type>          voice type (e.g. cloned)
+  --preset-engine <engine>     preset engine
+  --preset-voice-id <id>       preset voice id
+  --design-prompt <text>       voice design prompt
+  --default-engine <engine>    default TTS engine
+  --personality <text>         in-character personality prompt
+  --base-url <url>             API base url
+```
+
+```bash
+# create a profile, then clone a voice into it from a reference clip
+voicebox-cli profiles create "Narrator" --language en --personality "calm and warm"
+voicebox-cli profiles samples add <profile-id> sample.wav "This is my reference voice."
+
+# list profiles, then generate with one
+voicebox-cli profiles list
+voicebox-cli speak "Hello there" --profile Narrator -o outputs/hello.mp3
+```
+
 ### `health`
 
 ```
