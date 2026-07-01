@@ -181,6 +181,22 @@ export type ProfileSample = {
 	reference_text: string;
 };
 
+/** Status of a single model as returned by `GET /models/status`. */
+export type ModelStatus = {
+	model_name: string;
+	display_name: string;
+	hf_repo_id: string | null;
+	downloaded: boolean;
+	downloading?: boolean;
+	size_mb: number | null;
+	loaded?: boolean;
+};
+
+/** The list of model statuses returned by `GET /models/status`. */
+export type ModelStatusListResponse = {
+	models: ModelStatus[];
+};
+
 /**
  * Thin HTTP client for the voicebox TTS API.
  *
@@ -233,6 +249,43 @@ export class VoiceboxClient {
 			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify(body),
 		};
+	}
+
+	/**
+	 * Consume a server-sent event stream, yielding each `data:` payload
+	 * parsed as JSON, throwing on non-2xx.
+	 */
+	private async *streamEvents(path: string, init?: RequestInit): AsyncGenerator<unknown> {
+		const response = await fetch(`${this.baseUrl}${path}`, init);
+		if (response.ok === false || response.body === null) {
+			const detail = await response.text();
+			throw new Error(`${init?.method ?? 'GET'} ${path} failed (${response.status}): ${detail}`);
+		}
+
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder();
+		let buffer = '';
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (value !== undefined) {
+				buffer += decoder.decode(value, { stream: true });
+			}
+
+			const lines = buffer.split('\n');
+			buffer = lines.pop() ?? '';
+
+			for (const line of lines) {
+				if (line.startsWith('data:') === false) {
+					continue;
+				}
+				yield JSON.parse(line.slice('data:'.length).trim());
+			}
+
+			if (done === true) {
+				break;
+			}
+		}
 	}
 
 	/** Get server health, model, and GPU/backend status (`GET /health`). */
@@ -549,5 +602,74 @@ export class VoiceboxClient {
 	/** Download a completed generation's audio (`GET /audio/{id}`). */
 	async downloadAudio(generationId: string): Promise<Uint8Array> {
 		return await this.requestBytes(`/audio/${generationId}`);
+	}
+
+	/** Get the status of all available models (`GET /models/status`). */
+	async modelStatus(): Promise<ModelStatusListResponse> {
+		return await this.requestJson<ModelStatusListResponse>('/models/status');
+	}
+
+	/** Manually load the default TTS model at the given size (`POST /models/load`). */
+	async loadModel(modelSize?: string): Promise<unknown> {
+		const query = modelSize === undefined ? '' : `?model_size=${encodeURIComponent(modelSize)}`;
+		return await this.requestJson<unknown>(`/models/load${query}`, { method: 'POST' });
+	}
+
+	/** Unload the default TTS model to free memory (`POST /models/unload`). */
+	async unloadModel(): Promise<unknown> {
+		return await this.requestJson<unknown>('/models/unload', { method: 'POST' });
+	}
+
+	/** Unload a specific model from memory without deleting it (`POST /models/{name}/unload`). */
+	async unloadModelByName(modelName: string): Promise<unknown> {
+		return await this.requestJson<unknown>(`/models/${encodeURIComponent(modelName)}/unload`, {
+			method: 'POST',
+		});
+	}
+
+	/** Trigger download of a specific model (`POST /models/download`). */
+	async downloadModel(modelName: string): Promise<unknown> {
+		return await this.requestJson<unknown>('/models/download', {
+			method: 'POST',
+			...this.jsonBody({ model_name: modelName }),
+		});
+	}
+
+	/** Cancel or dismiss an errored/stale download task (`POST /models/download/cancel`). */
+	async cancelModelDownload(modelName: string): Promise<unknown> {
+		return await this.requestJson<unknown>('/models/download/cancel', {
+			method: 'POST',
+			...this.jsonBody({ model_name: modelName }),
+		});
+	}
+
+	/** Delete a downloaded model from the HuggingFace cache (`DELETE /models/{name}`). */
+	async deleteModel(modelName: string): Promise<unknown> {
+		return await this.requestJson<unknown>(`/models/${encodeURIComponent(modelName)}`, {
+			method: 'DELETE',
+		});
+	}
+
+	/** Get the HuggingFace model cache directory (`GET /models/cache-dir`). */
+	async modelsCacheDir(): Promise<unknown> {
+		return await this.requestJson<unknown>('/models/cache-dir');
+	}
+
+	/** Stream download progress for a model (`GET /models/progress/{name}`). */
+	streamModelProgress(modelName: string): AsyncGenerator<unknown> {
+		return this.streamEvents(`/models/progress/${encodeURIComponent(modelName)}`);
+	}
+
+	/** Move all downloaded models to a new directory, streaming progress (`POST /models/migrate`). */
+	migrateModels(destination: string): AsyncGenerator<unknown> {
+		return this.streamEvents('/models/migrate', {
+			method: 'POST',
+			...this.jsonBody({ destination }),
+		});
+	}
+
+	/** Stream the progress of an in-flight model migration (`GET /models/migrate/progress`). */
+	streamMigrationProgress(): AsyncGenerator<unknown> {
+		return this.streamEvents('/models/migrate/progress');
 	}
 }

@@ -196,6 +196,29 @@ voicebox-cli history list --profile <profile-id> --search "hello" --limit 20
 voicebox-cli history export-audio <id> -o outputs/take.wav
 ```
 
+### `models`
+
+Manage the TTS models the server can use. `status` lists every model with its download and loaded state; `load` and `unload` control what sits in memory; `download`, `cancel-download`, and `delete` manage what is on disk; `cache-dir` shows where models are stored; and `progress`, `migrate`, and `migrate-progress` stream live progress from download and directory-migration tasks.
+
+```
+voicebox-cli models status
+voicebox-cli models load [size]                      # size defaults to the server default
+voicebox-cli models unload [name]                    # no name unloads the default model
+voicebox-cli models download <name>
+voicebox-cli models cancel-download <name>
+voicebox-cli models delete <name>
+voicebox-cli models cache-dir
+voicebox-cli models progress <name>                  # streams SSE progress
+voicebox-cli models migrate <destination>            # streams SSE progress
+voicebox-cli models migrate-progress                 # streams SSE progress
+```
+
+```bash
+voicebox-cli models status
+voicebox-cli models load 1.7B
+voicebox-cli models download qwen-1.7b
+```
+
 ### `health`
 
 Report the API's status: whether the model is loaded, which backend and GPU are in use, and any compatibility warnings. Pass `-f`/`--filesystem` to instead check that the server's storage directories exist, are writable, and have free disk space. Add `--json` to print the raw response for scripting.
@@ -270,6 +293,7 @@ src/
     profiles_command.ts   # `profiles` command group
     channels_command.ts   # `channels` command group
     history_command.ts    # `history` command group
+    models_command.ts     # `models` command group
     health_command.ts     # `health` command
     shutdown_command.ts   # `shutdown` command
     watchdog_command.ts   # `watchdog` command
