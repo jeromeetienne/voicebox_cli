@@ -197,6 +197,18 @@ export type ModelStatusListResponse = {
 	models: ModelStatus[];
 };
 
+/** The transcript returned by `POST /transcribe`. */
+export type TranscriptionResponse = {
+	text: string;
+	duration: number;
+};
+
+/** Optional parameters for {@link VoiceboxClient.transcribe}. */
+export type TranscribeParams = {
+	language?: string;
+	model?: string;
+};
+
 /**
  * Thin HTTP client for the voicebox TTS API.
  *
@@ -602,6 +614,30 @@ export class VoiceboxClient {
 	/** Download a completed generation's audio (`GET /audio/{id}`). */
 	async downloadAudio(generationId: string): Promise<Uint8Array> {
 		return await this.requestBytes(`/audio/${generationId}`);
+	}
+
+	/**
+	 * Transcribe an audio file to text (`POST /transcribe`).
+	 *
+	 * @param file Audio bytes and the filename to send in the multipart body.
+	 * @param params Optional language hint and transcription model.
+	 */
+	async transcribe(
+		file: { data: Uint8Array; filename: string },
+		params: TranscribeParams = {},
+	): Promise<TranscriptionResponse> {
+		const form = new FormData();
+		form.append('file', new Blob([file.data as BlobPart]), file.filename);
+		if (params.language !== undefined) {
+			form.append('language', params.language);
+		}
+		if (params.model !== undefined) {
+			form.append('model', params.model);
+		}
+		return await this.requestJson<TranscriptionResponse>('/transcribe', {
+			method: 'POST',
+			body: form,
+		});
 	}
 
 	/** Get the status of all available models (`GET /models/status`). */

@@ -219,6 +219,46 @@ voicebox-cli models load 1.7B
 voicebox-cli models download qwen-1.7b
 ```
 
+### `transcribe`
+
+Transcribe an audio file to text. Pass the file path and, optionally, a language hint and a transcription model. By default it prints just the transcript; add `--json` to get the raw response including the audio duration.
+
+```
+voicebox-cli transcribe <file> [options]
+
+Options:
+  -l, --language <language>  language hint (e.g. en, fr, ja)
+  -m, --model <model>        transcription model
+  --json                     print the raw JSON response
+  --base-url <url>           API base url
+  -h, --help                 display help for command
+```
+
+Examples:
+
+```bash
+# Simplest: audio file → transcript printed to stdout
+voicebox-cli transcribe outputs/take.wav
+
+# Give a language hint for better accuracy
+voicebox-cli transcribe outputs/take.wav --language en
+
+# Pick a specific transcription model
+voicebox-cli transcribe outputs/take.wav --model whisper-turbo
+
+# Get the raw JSON (includes the audio duration)
+voicebox-cli transcribe outputs/take.wav --json
+
+# Save the transcript to a text file
+voicebox-cli transcribe outputs/take.wav > outputs/take.txt
+
+# Point at a server on another host/port
+voicebox-cli transcribe outputs/take.wav --base-url http://192.168.1.50:17493
+
+# Using short flags
+voicebox-cli transcribe outputs/take.wav -l en -m whisper-turbo
+```
+
 ### `health`
 
 Report the API's status: whether the model is loaded, which backend and GPU are in use, and any compatibility warnings. Pass `-f`/`--filesystem` to instead check that the server's storage directories exist, are writable, and have free disk space. Add `--json` to print the raw response for scripting.
@@ -294,6 +334,7 @@ src/
     channels_command.ts   # `channels` command group
     history_command.ts    # `history` command group
     models_command.ts     # `models` command group
+    transcribe_command.ts # `transcribe` command
     health_command.ts     # `health` command
     shutdown_command.ts   # `shutdown` command
     watchdog_command.ts   # `watchdog` command
