@@ -1,24 +1,52 @@
 {
 	"name": "voicebox-cli",
 	"version": "0.1.0",
+	"description": "Command-line client for the voicebox TTS API",
 	"type": "module",
-	"private": true,
+	"license": "MIT",
+	"author": "Jerome Etienne",
+	"keywords": [
+		"voicebox",
+		"tts",
+		"text-to-speech",
+		"cli",
+		"voice"
+	],
 	"bin": {
-		"voicebox": "src/cli.ts"
+		"voicebox": "dist/cli.js"
+	},
+	"main": "dist/misc/voicebox-client.js",
+	"types": "dist/misc/voicebox-client.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/misc/voicebox-client.d.ts",
+			"import": "./dist/misc/voicebox-client.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"engines": {
+		"node": ">=20"
 	},
 	"scripts": {
 		"cli": "tsx src/cli.ts",
 		"test": "tsx --test test/*.test.ts",
 		"typecheck": "tsc -p tsconfig.json",
-		"build": "tsc -p tsconfig.build.json"
+		"build": "tsc -p tsconfig.build.json",
+		"prepublishOnly": "npm run typecheck && npm test && npm run build",
+		"publish:all": "npm run build && npm version patch && npm publish"
 	},
 	"dependencies": {
 		"commander": "^15.0.0",
-		"ffmpeg-static": "^5.3.0",
+		"ffmpeg-static": "^5.3.0"
+	},
+	"devDependencies": {
+		"@types/node": "^26.1.0",
 		"tsx": "^4.19.2",
 		"typescript": "^5.7.2"
 	},
-	"devDependencies": {
-		"@types/node": "^26.1.0"
+	"publishConfig": {
+		"access": "public"
 	}
 }

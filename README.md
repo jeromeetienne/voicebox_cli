@@ -11,13 +11,22 @@ A small TypeScript command-line client for the [voicebox](http://127.0.0.1:17493
 
 ## Install
 
+Run it directly with `npx`:
+
 ```bash
-npm install
+npx voicebox-cli speak "Hello, world!" --profile Test --output hello.mp3
+```
+
+Or install it globally:
+
+```bash
+npm install -g voicebox-cli
+voicebox speak "Hello, world!" --profile Test --output hello.mp3
 ```
 
 ## Usage
 
-Run the CLI via the `cli` script (uses `tsx`, no build step needed):
+Once installed, the `voicebox` binary is available. During development, run it from source via the `cli` script (uses `tsx`, no build step needed):
 
 ```bash
 npm run cli -- speak "Hello, world!" --profile Test --output outputs/hello.mp3
