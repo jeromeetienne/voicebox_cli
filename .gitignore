@@ -1,0 +1,8 @@
+node_modules/
+*.log
+
+# generated audio (kept for examples/)
+*.wav
+*.mp3
+!examples/*.wav
+!examples/*.mp3

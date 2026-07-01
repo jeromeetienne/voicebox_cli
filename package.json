@@ -1,0 +1,16 @@
+{
+	"name": "voicebox-cli",
+	"version": "0.1.0",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"speak": "tsx examples/generate-speech.ts"
+	},
+	"dependencies": {
+		"tsx": "^4.19.2",
+		"typescript": "^5.7.2"
+	},
+	"devDependencies": {
+		"@types/node": "^26.1.0"
+	}
+}
