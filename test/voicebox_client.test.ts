@@ -57,6 +57,22 @@ test('createProfile sends a JSON POST body', async () => {
 	assert.deepEqual(JSON.parse(String(init?.body)), { name: 'Bob', language: 'fr' });
 });
 
+test('createChannel posts name and device_ids', async () => {
+	const calls = stubFetch(() => new Response(JSON.stringify({ id: 'c1', name: 'Room' }), { status: 200 }));
+	await new VoiceboxClient('http://example.test').createChannel('Room', ['dev-1']);
+	assert.equal(calls[0].url, 'http://example.test/channels');
+	assert.equal(calls[0].init?.method, 'POST');
+	assert.deepEqual(JSON.parse(String(calls[0].init?.body)), { name: 'Room', device_ids: ['dev-1'] });
+});
+
+test('setChannelVoices PUTs the profile ids', async () => {
+	const calls = stubFetch(() => new Response('{}', { status: 200 }));
+	await new VoiceboxClient('http://example.test').setChannelVoices('c1', ['p1', 'p2']);
+	assert.equal(calls[0].url, 'http://example.test/channels/c1/voices');
+	assert.equal(calls[0].init?.method, 'PUT');
+	assert.deepEqual(JSON.parse(String(calls[0].init?.body)), { profile_ids: ['p1', 'p2'] });
+});
+
 test('deleteProfile issues a DELETE request', async () => {
 	const calls = stubFetch(() => new Response(null, { status: 204 }));
 	await new VoiceboxClient('http://example.test').deleteProfile('p3');

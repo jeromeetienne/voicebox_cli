@@ -95,6 +95,28 @@ voicebox-cli profiles list
 voicebox-cli speak "Hello there" --profile Narrator -o outputs/hello.mp3
 ```
 
+### `channels`
+
+Manage audio output channels and their assigned voice profiles.
+
+```
+voicebox-cli channels <subcommand> [options]
+
+Subcommands:
+  list                              list all channels
+  get <id>                          show a single channel (JSON)
+  create <name> [--device <id...>]  create a channel
+  update <id> [-n <name>] [--device <id...>]   update a channel
+  delete <id>                       delete a channel
+  voices <id>                       list profiles assigned to a channel
+  set-voices <id> <profile-ids...>  assign profiles to a channel
+```
+
+```bash
+voicebox-cli channels create "Living room" --device dev-1 --device dev-2
+voicebox-cli channels set-voices <channel-id> <profile-id-a> <profile-id-b>
+```
+
 ### `health`
 
 ```
@@ -153,6 +175,7 @@ src/
   commands/
     speak_command.ts      # `speak` command
     profiles_command.ts   # `profiles` command group
+    channels_command.ts   # `channels` command group
     health_command.ts     # `health` command
     shutdown_command.ts   # `shutdown` command
   misc/

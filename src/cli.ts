@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
 import { Command } from 'commander';
+import { ChannelsCommand } from './commands/channels_command.js';
 import { HealthCommand } from './commands/health_command.js';
 import { ProfilesCommand } from './commands/profiles_command.js';
 import { ShutdownCommand } from './commands/shutdown_command.js';
@@ -24,6 +25,7 @@ export class Cli {
 
 		SpeakCommand.register(program);
 		ProfilesCommand.register(program);
+		ChannelsCommand.register(program);
 		HealthCommand.register(program);
 		ShutdownCommand.register(program);
 

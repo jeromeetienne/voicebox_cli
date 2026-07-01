@@ -69,6 +69,19 @@ export type FilesystemHealthResponse = {
 	directories: DirectoryCheck[];
 };
 
+export type AudioChannel = {
+	id: string;
+	name: string;
+	is_default: boolean;
+	device_ids: string[];
+	created_at: string;
+};
+
+export type AudioChannelInput = {
+	name?: string | null;
+	device_ids?: string[] | null;
+};
+
 export type VoiceProfile = {
 	id: string;
 	name: string;
@@ -153,6 +166,43 @@ export class VoiceboxClient {
 
 	async shutdown(): Promise<void> {
 		await this.requestVoid('/shutdown', { method: 'POST' });
+	}
+
+	async listChannels(): Promise<AudioChannel[]> {
+		return await this.requestJson<AudioChannel[]>('/channels');
+	}
+
+	async getChannel(channelId: string): Promise<AudioChannel> {
+		return await this.requestJson<AudioChannel>(`/channels/${channelId}`);
+	}
+
+	async createChannel(name: string, deviceIds: string[] = []): Promise<AudioChannel> {
+		return await this.requestJson<AudioChannel>('/channels', {
+			method: 'POST',
+			...this.jsonBody({ name, device_ids: deviceIds }),
+		});
+	}
+
+	async updateChannel(channelId: string, input: AudioChannelInput): Promise<AudioChannel> {
+		return await this.requestJson<AudioChannel>(`/channels/${channelId}`, {
+			method: 'PUT',
+			...this.jsonBody(input),
+		});
+	}
+
+	async deleteChannel(channelId: string): Promise<void> {
+		await this.requestVoid(`/channels/${channelId}`, { method: 'DELETE' });
+	}
+
+	async getChannelVoices(channelId: string): Promise<unknown> {
+		return await this.requestJson<unknown>(`/channels/${channelId}/voices`);
+	}
+
+	async setChannelVoices(channelId: string, profileIds: string[]): Promise<unknown> {
+		return await this.requestJson<unknown>(`/channels/${channelId}/voices`, {
+			method: 'PUT',
+			...this.jsonBody({ profile_ids: profileIds }),
+		});
 	}
 
 	async filesystemHealth(): Promise<FilesystemHealthResponse> {
