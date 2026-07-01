@@ -68,6 +68,22 @@ gpu: MPS (Apple Silicon)
 backend: mlx (cpu)
 ```
 
+### `shutdown`
+
+Gracefully shuts down the API server. Requires `--yes` to confirm, since it stops the running server.
+
+```
+voicebox-cli shutdown [options]
+
+Options:
+  -y, --yes         skip the confirmation prompt
+  --base-url <url>  API base url
+```
+
+```bash
+voicebox-cli shutdown --yes
+```
+
 ## Output formats
 
 The API serves WAV; the CLI transcodes locally.
@@ -92,6 +108,7 @@ src/
     speak_command.ts      # `speak` command
     profiles_command.ts   # `profiles` command group
     health_command.ts     # `health` command
+    shutdown_command.ts   # `shutdown` command
   misc/
     voicebox_client.ts    # VoiceboxClient — /speak, /profiles, status stream, audio download
     audio_convert.ts      # AudioConvert — WAV → MP3 via ffmpeg-static

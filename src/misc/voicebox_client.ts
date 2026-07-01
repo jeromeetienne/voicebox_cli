@@ -151,6 +151,10 @@ export class VoiceboxClient {
 		return await this.requestJson<HealthResponse>('/health');
 	}
 
+	async shutdown(): Promise<void> {
+		await this.requestVoid('/shutdown', { method: 'POST' });
+	}
+
 	async filesystemHealth(): Promise<FilesystemHealthResponse> {
 		return await this.requestJson<FilesystemHealthResponse>('/health/filesystem');
 	}

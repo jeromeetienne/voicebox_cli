@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { Command } from 'commander';
 import { HealthCommand } from './commands/health_command.js';
 import { ProfilesCommand } from './commands/profiles_command.js';
+import { ShutdownCommand } from './commands/shutdown_command.js';
 import { SpeakCommand } from './commands/speak_command.js';
 
 type PackageJson = {
@@ -24,6 +25,7 @@ export class Cli {
 		SpeakCommand.register(program);
 		ProfilesCommand.register(program);
 		HealthCommand.register(program);
+		ShutdownCommand.register(program);
 
 		return program;
 	}
