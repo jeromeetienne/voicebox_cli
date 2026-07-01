@@ -209,6 +209,65 @@ export type TranscribeParams = {
 	model?: string;
 };
 
+/** A story as returned in the list view (`GET /stories`). */
+export type Story = {
+	id: string;
+	name: string;
+	description: string | null;
+	created_at: string;
+	updated_at: string;
+	item_count: number;
+};
+
+/** A single clip placed on a story's timeline. */
+export type StoryItem = {
+	id: string;
+	story_id: string;
+	generation_id: string;
+	version_id: string | null;
+	start_time_ms: number;
+	track: number;
+	trim_start_ms: number;
+	trim_end_ms: number;
+	profile_id: string;
+	profile_name: string;
+	text: string;
+	language: string;
+	audio_path: string;
+	duration: number;
+	volume: number;
+	created_at: string;
+};
+
+/** A story with its full list of timeline items (`GET /stories/{id}`). */
+export type StoryDetail = {
+	id: string;
+	name: string;
+	description: string | null;
+	created_at: string;
+	updated_at: string;
+	items: StoryItem[];
+};
+
+/** Fields accepted when creating or replacing a story. */
+export type StoryInput = {
+	name: string;
+	description?: string | null;
+};
+
+/** Fields accepted when adding a generation to a story. */
+export type StoryItemInput = {
+	generation_id: string;
+	start_time_ms?: number | null;
+	track?: number | null;
+};
+
+/** A single timecode update in a batch times update. */
+export type StoryItemTime = {
+	generation_id: string;
+	start_time_ms: number;
+};
+
 /**
  * Thin HTTP client for the voicebox TTS API.
  *
@@ -707,5 +766,139 @@ export class VoiceboxClient {
 	/** Stream the progress of an in-flight model migration (`GET /models/migrate/progress`). */
 	streamMigrationProgress(): AsyncGenerator<unknown> {
 		return this.streamEvents('/models/migrate/progress');
+	}
+
+	/** List all stories (`GET /stories`). */
+	async listStories(): Promise<Story[]> {
+		return await this.requestJson<Story[]>('/stories');
+	}
+
+	/** Get a story with all of its items (`GET /stories/{id}`). */
+	async getStory(storyId: string): Promise<StoryDetail> {
+		return await this.requestJson<StoryDetail>(`/stories/${storyId}`);
+	}
+
+	/** Create a story (`POST /stories`). */
+	async createStory(input: StoryInput): Promise<Story> {
+		return await this.requestJson<Story>('/stories', {
+			method: 'POST',
+			...this.jsonBody(input),
+		});
+	}
+
+	/** Update a story's name and/or description (`PUT /stories/{id}`). */
+	async updateStory(storyId: string, input: StoryInput): Promise<Story> {
+		return await this.requestJson<Story>(`/stories/${storyId}`, {
+			method: 'PUT',
+			...this.jsonBody(input),
+		});
+	}
+
+	/** Delete a story (`DELETE /stories/{id}`). */
+	async deleteStory(storyId: string): Promise<void> {
+		await this.requestVoid(`/stories/${storyId}`, { method: 'DELETE' });
+	}
+
+	/** Export a story as a single mixed audio file (`GET /stories/{id}/export-audio`). */
+	async exportStoryAudio(storyId: string): Promise<Uint8Array> {
+		return await this.requestBytes(`/stories/${storyId}/export-audio`);
+	}
+
+	/** Add a generation to a story's timeline (`POST /stories/{id}/items`). */
+	async addStoryItem(storyId: string, input: StoryItemInput): Promise<StoryItem> {
+		return await this.requestJson<StoryItem>(`/stories/${storyId}/items`, {
+			method: 'POST',
+			...this.jsonBody(input),
+		});
+	}
+
+	/** Remove an item from a story (`DELETE /stories/{id}/items/{item_id}`). */
+	async removeStoryItem(storyId: string, itemId: string): Promise<void> {
+		await this.requestVoid(`/stories/${storyId}/items/${itemId}`, { method: 'DELETE' });
+	}
+
+	/** Batch-update item timecodes (`PUT /stories/{id}/items/times`). */
+	async updateStoryItemTimes(storyId: string, updates: StoryItemTime[]): Promise<unknown> {
+		return await this.requestJson<unknown>(`/stories/${storyId}/items/times`, {
+			method: 'PUT',
+			...this.jsonBody({ updates }),
+		});
+	}
+
+	/** Reorder items by generation id, recalculating timecodes (`PUT /stories/{id}/items/reorder`). */
+	async reorderStoryItems(storyId: string, generationIds: string[]): Promise<StoryItem[]> {
+		return await this.requestJson<StoryItem[]>(`/stories/${storyId}/items/reorder`, {
+			method: 'PUT',
+			...this.jsonBody({ generation_ids: generationIds }),
+		});
+	}
+
+	/** Move an item to a new position and/or track (`PUT /stories/{id}/items/{item_id}/move`). */
+	async moveStoryItem(
+		storyId: string,
+		itemId: string,
+		startTimeMs: number,
+		track?: number,
+	): Promise<StoryItem> {
+		const body: { start_time_ms: number; track?: number } = { start_time_ms: startTimeMs };
+		if (track !== undefined) {
+			body.track = track;
+		}
+		return await this.requestJson<StoryItem>(`/stories/${storyId}/items/${itemId}/move`, {
+			method: 'PUT',
+			...this.jsonBody(body),
+		});
+	}
+
+	/** Trim an item's start/end in milliseconds (`PUT /stories/{id}/items/{item_id}/trim`). */
+	async trimStoryItem(
+		storyId: string,
+		itemId: string,
+		trimStartMs: number,
+		trimEndMs: number,
+	): Promise<StoryItem> {
+		return await this.requestJson<StoryItem>(`/stories/${storyId}/items/${itemId}/trim`, {
+			method: 'PUT',
+			...this.jsonBody({ trim_start_ms: trimStartMs, trim_end_ms: trimEndMs }),
+		});
+	}
+
+	/** Set an item's per-clip volume (linear gain, 0.0–2.0) (`PUT /stories/{id}/items/{item_id}/volume`). */
+	async setStoryItemVolume(storyId: string, itemId: string, volume: number): Promise<StoryItem> {
+		return await this.requestJson<StoryItem>(`/stories/${storyId}/items/${itemId}/volume`, {
+			method: 'PUT',
+			...this.jsonBody({ volume }),
+		});
+	}
+
+	/** Split an item at a given time into two clips (`POST /stories/{id}/items/{item_id}/split`). */
+	async splitStoryItem(storyId: string, itemId: string, splitTimeMs: number): Promise<StoryItem[]> {
+		return await this.requestJson<StoryItem[]>(`/stories/${storyId}/items/${itemId}/split`, {
+			method: 'POST',
+			...this.jsonBody({ split_time_ms: splitTimeMs }),
+		});
+	}
+
+	/** Duplicate an item (`POST /stories/{id}/items/{item_id}/duplicate`). */
+	async duplicateStoryItem(storyId: string, itemId: string): Promise<StoryItem> {
+		return await this.requestJson<StoryItem>(`/stories/${storyId}/items/${itemId}/duplicate`, {
+			method: 'POST',
+		});
+	}
+
+	/**
+	 * Pin an item to a specific generation version (`PUT /stories/{id}/items/{item_id}/version`).
+	 *
+	 * Pass `undefined` (or `null`) to clear the pin and fall back to the default.
+	 */
+	async setStoryItemVersion(
+		storyId: string,
+		itemId: string,
+		versionId?: string | null,
+	): Promise<StoryItem> {
+		return await this.requestJson<StoryItem>(`/stories/${storyId}/items/${itemId}/version`, {
+			method: 'PUT',
+			...this.jsonBody({ version_id: versionId ?? null }),
+		});
 	}
 }

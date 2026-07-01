@@ -219,6 +219,47 @@ voicebox-cli models load 1.7B
 voicebox-cli models download qwen-1.7b
 ```
 
+### `stories`
+
+Assemble multi-clip stories from existing generations on a timeline and export them as one mixed audio file. The top-level subcommands manage stories themselves (`list`, `get`, `create`, `update`, `delete`, `export-audio`); the `stories items` subgroup manages the clips on a story's timeline — adding, removing, reordering, moving, trimming, adjusting per-clip volume, splitting, duplicating, and pinning a clip to a specific generation version.
+
+```
+voicebox-cli stories list
+voicebox-cli stories get <id>
+voicebox-cli stories create <name> [-d <description>]
+voicebox-cli stories update <id> <name> [-d <description>]
+voicebox-cli stories delete <id>
+voicebox-cli stories export-audio <id> [-o <path>]        # wav (default: outputs/<id>.wav)
+
+voicebox-cli stories items add <story-id> <generation-id> [--start-time-ms <n>] [--track <n>]
+voicebox-cli stories items remove <story-id> <item-id>
+voicebox-cli stories items times <story-id> <gen-id:ms>...   # e.g. g1:0 g2:2500
+voicebox-cli stories items reorder <story-id> <generation-id>...
+voicebox-cli stories items move <story-id> <item-id> <start-time-ms> [--track <n>]
+voicebox-cli stories items trim <story-id> <item-id> <trim-start-ms> <trim-end-ms>
+voicebox-cli stories items volume <story-id> <item-id> <volume>   # linear gain 0.0-2.0
+voicebox-cli stories items split <story-id> <item-id> <split-time-ms>
+voicebox-cli stories items duplicate <story-id> <item-id>
+voicebox-cli stories items version <story-id> <item-id> [version-id]   # omit to clear the pin
+```
+
+Examples:
+
+```bash
+# Create a story and add two generations to its timeline
+voicebox-cli stories create "Chapter 1" --description "The opening scene"
+voicebox-cli stories items add <story-id> <generation-id>
+voicebox-cli stories items add <story-id> <generation-id> --start-time-ms 3000
+
+# Reorder by generation id, then export the mixed audio
+voicebox-cli stories items reorder <story-id> <gen-a> <gen-b>
+voicebox-cli stories export-audio <story-id> -o outputs/chapter1.wav
+
+# Fine-tune a single clip
+voicebox-cli stories items volume <story-id> <item-id> 0.8
+voicebox-cli stories items trim <story-id> <item-id> 250 100
+```
+
 ### `transcribe`
 
 Transcribe an audio file to text. Pass the file path and, optionally, a language hint and a transcription model. By default it prints just the transcript; add `--json` to get the raw response including the audio duration.
@@ -334,6 +375,7 @@ src/
     channels_command.ts   # `channels` command group
     history_command.ts    # `history` command group
     models_command.ts     # `models` command group
+    stories_command.ts    # `stories` command group
     transcribe_command.ts # `transcribe` command
     health_command.ts     # `health` command
     shutdown_command.ts   # `shutdown` command

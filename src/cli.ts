@@ -9,6 +9,7 @@ import { ModelsCommand } from './commands/models_command.js';
 import { ProfilesCommand } from './commands/profiles_command.js';
 import { ShutdownCommand } from './commands/shutdown_command.js';
 import { SpeakCommand } from './commands/speak_command.js';
+import { StoriesCommand } from './commands/stories_command.js';
 import { TranscribeCommand } from './commands/transcribe_command.js';
 import { WatchdogCommand } from './commands/watchdog_command.js';
 
@@ -44,6 +45,7 @@ export class Cli {
 		ChannelsCommand.register(program);
 		HistoryCommand.register(program);
 		ModelsCommand.register(program);
+		StoriesCommand.register(program);
 		TranscribeCommand.register(program);
 		HealthCommand.register(program);
 		ShutdownCommand.register(program);
