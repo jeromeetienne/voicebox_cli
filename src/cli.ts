@@ -56,6 +56,7 @@ export class Cli {
 }
 
 Cli.build().parseAsync(process.argv).catch((error: unknown) => {
+	// display the error and exit with a non-zero code so that CI/CD pipelines can detect failure
 	console.error(error instanceof Error ? error.message : error);
 	process.exit(1);
 });
