@@ -33,6 +33,7 @@
 	"scripts": {
 		"cli": "tsx src/cli.ts",
 		"symlink:dotclaude": "bash scripts/symlink_dotclaude.sh",
+		"clean:outputs": "find outputs -type f ! -name .gitignore -delete",
 		"test": "tsx --test test/*.test.ts",
 		"typecheck": "tsc -p tsconfig.json",
 		"build": "tsc -p tsconfig.build.json",
