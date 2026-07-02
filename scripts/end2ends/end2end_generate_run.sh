@@ -14,7 +14,7 @@ cd "$(dirname "$0")/../.."
 
 # Configuration
 TEXT='Hello world, how are you today?'
-OUTPUT='outputs/end2end_generate_run.wav'
+AUDIO_FILE='outputs/end2end_generate_run.wav'
 
 # Fetch available voice profiles from the API
 echo '==> Fetching profiles...'
@@ -32,15 +32,15 @@ FIRST_PROFILE_NAME="$(printf '%s\n' "${PROFILES}" | head -n 1 | awk '{print $2}'
 echo "==> Using first profile: ${FIRST_PROFILE_ID} (${FIRST_PROFILE_NAME})"
 
 # Create the output directory if it doesn't exist
-mkdir -p "$(dirname "${OUTPUT}")"
+mkdir -p "$(dirname "${AUDIO_FILE}")"
 
 # Generate the WAV file using the selected profile
 echo "==> Generating WAV for '${TEXT}'..."
-npx voicebox-cli generate run "${FIRST_PROFILE_ID}" "${TEXT}" --output "${OUTPUT}"
+npx voicebox-cli generate run "${FIRST_PROFILE_ID}" "${TEXT}" --output "${AUDIO_FILE}"
 
 # Play the generated WAV file
 echo "==> To play the generated WAV file, run:"
-echo "afplay \"${OUTPUT}\""
+echo "afplay \"${AUDIO_FILE}\""
 
 # Confirm completion
-echo "==> Done: ${OUTPUT}"
+echo "==> Done: ${AUDIO_FILE}"
