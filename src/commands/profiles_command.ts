@@ -1,8 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import type { Command } from 'commander';
+import { EnumOption } from '../misc/enum-option.js';
 import type { VoiceProfileInput } from '../misc/voicebox_client.js';
-import { VoiceboxClient } from '../misc/voicebox_client.js';
+import { SPEAK_ENGINES, SPEAK_LANGUAGES, VoiceboxClient } from '../misc/voicebox_client.js';
 
 /** Options shared by every profiles subcommand. */
 type GlobalOptions = {
@@ -51,12 +52,12 @@ export class ProfilesCommand {
 			.description('Create a voice profile')
 			.argument('<name>', 'profile name')
 			.option('-d, --description <text>', 'description')
-			.option('-l, --language <code>', 'language code', 'en')
+			.addOption(EnumOption.create('-l, --language <code>', 'language code', SPEAK_LANGUAGES, 'en'))
 			.option('--voice-type <type>', 'voice type (e.g. cloned)')
-			.option('--preset-engine <engine>', 'preset engine')
+			.addOption(EnumOption.create('--preset-engine <engine>', 'preset engine', SPEAK_ENGINES))
 			.option('--preset-voice-id <id>', 'preset voice id')
 			.option('--design-prompt <text>', 'voice design prompt')
-			.option('--default-engine <engine>', 'default TTS engine')
+			.addOption(EnumOption.create('--default-engine <engine>', 'default TTS engine', SPEAK_ENGINES))
 			.option('--personality <text>', 'in-character personality prompt')
 			.option('--base-url <url>', 'API base url')
 			.action(async (name: string, options: CreateOptions) => {
@@ -69,12 +70,12 @@ export class ProfilesCommand {
 			.argument('<id>', 'profile id')
 			.option('-n, --name <name>', 'profile name')
 			.option('-d, --description <text>', 'description')
-			.option('-l, --language <code>', 'language code')
+			.addOption(EnumOption.create('-l, --language <code>', 'language code', SPEAK_LANGUAGES))
 			.option('--voice-type <type>', 'voice type')
-			.option('--preset-engine <engine>', 'preset engine')
+			.addOption(EnumOption.create('--preset-engine <engine>', 'preset engine', SPEAK_ENGINES))
 			.option('--preset-voice-id <id>', 'preset voice id')
 			.option('--design-prompt <text>', 'voice design prompt')
-			.option('--default-engine <engine>', 'default TTS engine')
+			.addOption(EnumOption.create('--default-engine <engine>', 'default TTS engine', SPEAK_ENGINES))
 			.option('--personality <text>', 'in-character personality prompt')
 			.option('--base-url <url>', 'API base url')
 			.action(async (id: string, options: CreateOptions & { name?: string }) => {

@@ -268,8 +268,8 @@ Transcribe an audio file to text. Pass the file path and, optionally, a language
 npx voicebox-cli transcribe <file> [options]
 
 Options:
-  -l, --language <language>  language hint (e.g. en, fr, ja)
-  -m, --model <model>        transcription model: whisper-base (default), whisper-small, whisper-medium, whisper-large, whisper-turbo
+  -l, --language <language>  language hint (one of: zh, en, ja, ...; pass 'list' to see options)
+  -m, --model <model>        transcription model (one of: base, small, medium, large, turbo; pass 'list' to see options)
   --json                     print the raw JSON response
   --base-url <url>           API base url
   -h, --help                 display help for command
@@ -287,8 +287,11 @@ npx voicebox-cli transcribe outputs/take.mp3
 # Give a language hint for better accuracy
 npx voicebox-cli transcribe outputs/take.wav --language en
 
-# Pick a specific transcription model (whisper-base, whisper-small, whisper-medium, whisper-large, whisper-turbo)
-npx voicebox-cli transcribe outputs/take.wav --model whisper-turbo
+# Pick a specific transcription model (base, small, medium, large, turbo)
+npx voicebox-cli transcribe outputs/take.wav --model turbo
+
+# Pass 'list' to any enum option to print its accepted values
+npx voicebox-cli transcribe outputs/take.wav --model list
 
 # Get the raw JSON (includes the audio duration)
 npx voicebox-cli transcribe outputs/take.wav --json
@@ -300,7 +303,7 @@ npx voicebox-cli transcribe outputs/take.wav > outputs/take.txt
 npx voicebox-cli transcribe outputs/take.wav --base-url http://192.168.1.50:17493
 
 # Using short flags
-npx voicebox-cli transcribe outputs/take.wav -l en -m whisper-turbo
+npx voicebox-cli transcribe outputs/take.wav -l en -m turbo
 ```
 
 ### `health`

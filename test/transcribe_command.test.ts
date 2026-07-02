@@ -74,10 +74,10 @@ test('transcribe: forwards language and model form fields', async () => {
 		});
 		TestHelpers.captureLogs();
 
-		await TranscribeCommand.run(file, { language: 'fr', model: 'whisper-turbo' });
+		await TranscribeCommand.run(file, { language: 'fr', model: 'turbo' });
 
 		assert.equal(form?.get('language'), 'fr');
-		assert.equal(form?.get('model'), 'whisper-turbo');
+		assert.equal(form?.get('model'), 'turbo');
 	});
 });
 

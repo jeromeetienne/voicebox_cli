@@ -2,7 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { basename, extname } from 'node:path';
 import type { Command } from 'commander';
 import { AudioConvert } from '../misc/audio_convert.js';
-import { VoiceboxClient } from '../misc/voicebox_client.js';
+import { EnumOption } from '../misc/enum-option.js';
+import { SPEAK_LANGUAGES, TRANSCRIBE_MODELS, VoiceboxClient } from '../misc/voicebox_client.js';
 
 /** Options accepted by the `transcribe` command. */
 export type TranscribeOptions = {
@@ -20,11 +21,8 @@ export class TranscribeCommand {
 			.command('transcribe')
 			.description('Transcribe an audio file to text')
 			.argument('<file>', 'audio file path')
-			.option('-l, --language <language>', 'language hint (e.g. en, fr, ja)')
-			.option(
-				'-m, --model <model>',
-				'transcription model: whisper-base (default), whisper-small, whisper-medium, whisper-large, whisper-turbo',
-			)
+			.addOption(EnumOption.create('-l, --language <language>', 'language hint', SPEAK_LANGUAGES))
+			.addOption(EnumOption.create('-m, --model <model>', 'transcription model', TRANSCRIBE_MODELS))
 			.option('--json', 'print the raw JSON response')
 			.option('--base-url <url>', 'API base url')
 			.action(async (file: string, options: TranscribeOptions) => {

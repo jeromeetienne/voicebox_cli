@@ -1,18 +1,26 @@
 /** TTS engines accepted by the API. */
-export type SpeakEngine =
-	| 'qwen'
-	| 'qwen_custom_voice'
-	| 'luxtts'
-	| 'chatterbox'
-	| 'chatterbox_turbo'
-	| 'tada'
-	| 'kokoro';
+export const SPEAK_ENGINES = [
+	'qwen',
+	'qwen_custom_voice',
+	'luxtts',
+	'chatterbox',
+	'chatterbox_turbo',
+	'tada',
+	'kokoro',
+] as const;
+export type SpeakEngine = (typeof SPEAK_ENGINES)[number];
 
 /** ISO-639-1 style language codes accepted by the API. */
-export type SpeakLanguage =
-	| 'zh' | 'en' | 'ja' | 'ko' | 'de' | 'fr' | 'ru' | 'pt' | 'es'
-	| 'it' | 'he' | 'ar' | 'da' | 'el' | 'fi' | 'hi' | 'ms' | 'nl'
-	| 'no' | 'pl' | 'sv' | 'sw' | 'tr';
+export const SPEAK_LANGUAGES = [
+	'zh', 'en', 'ja', 'ko', 'de', 'fr', 'ru', 'pt', 'es',
+	'it', 'he', 'ar', 'da', 'el', 'fi', 'hi', 'ms', 'nl',
+	'no', 'pl', 'sv', 'sw', 'tr',
+] as const;
+export type SpeakLanguage = (typeof SPEAK_LANGUAGES)[number];
+
+/** Whisper model sizes accepted by the `POST /transcribe` endpoint. */
+export const TRANSCRIBE_MODELS = ['base', 'small', 'medium', 'large', 'turbo'] as const;
+export type TranscribeModel = (typeof TRANSCRIBE_MODELS)[number];
 
 /** Body for the simplified `POST /speak` endpoint. */
 export type SpeakRequest = {

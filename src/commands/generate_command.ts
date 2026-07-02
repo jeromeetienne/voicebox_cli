@@ -1,7 +1,8 @@
 import { writeFile } from 'node:fs/promises';
 import type { Command } from 'commander';
 import { AudioConvert } from '../misc/audio_convert.js';
-import { VoiceboxClient } from '../misc/voicebox_client.js';
+import { EnumOption } from '../misc/enum-option.js';
+import { SPEAK_ENGINES, SPEAK_LANGUAGES, VoiceboxClient } from '../misc/voicebox_client.js';
 
 /** Options shared by every `generate` subcommand. */
 type GlobalOptions = {
@@ -45,11 +46,11 @@ export class GenerateCommand {
 			.argument('<profile-id>', 'voice profile id')
 			.argument('<text>', 'text to synthesize')
 			.option('-o, --output <path>', 'output file (.mp3 or .wav)', 'outputs/generation.mp3')
-			.option('-l, --language <code>', 'language code', 'en')
+			.addOption(EnumOption.create('-l, --language <code>', 'language code', SPEAK_LANGUAGES, 'en'))
 			.option('--seed <n>', 'random seed', toInt)
 			.option('--model-size <size>', 'model size (e.g. 1.7B)')
 			.option('--instruct <text>', 'instruction / style prompt')
-			.option('-e, --engine <engine>', 'TTS engine')
+			.addOption(EnumOption.create('-e, --engine <engine>', 'TTS engine', SPEAK_ENGINES))
 			.option('--personality', 'rewrite the text in-character before TTS')
 			.option('--max-chunk-chars <n>', 'max characters per chunk for long text', toInt)
 			.option('--crossfade-ms <n>', 'crossfade between chunks in ms', toInt)

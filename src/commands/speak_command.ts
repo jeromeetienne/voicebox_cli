@@ -1,8 +1,9 @@
 import { writeFile } from 'node:fs/promises';
 import type { Command } from 'commander';
 import { AudioConvert } from '../misc/audio_convert.js';
+import { EnumOption } from '../misc/enum-option.js';
 import type { SpeakEngine, SpeakLanguage } from '../misc/voicebox_client.js';
-import { VoiceboxClient } from '../misc/voicebox_client.js';
+import { SPEAK_ENGINES, SPEAK_LANGUAGES, VoiceboxClient } from '../misc/voicebox_client.js';
 
 /** Options accepted by the `speak` command. */
 export type SpeakOptions = {
@@ -24,8 +25,8 @@ export class SpeakCommand {
 			.argument('<text>', 'text to synthesize')
 			.option('-p, --profile <profile>', 'voice profile name or id')
 			.option('-o, --output <path>', 'output file (.mp3 or .wav)', 'speech.mp3')
-			.option('-e, --engine <engine>', 'TTS engine')
-			.option('-l, --language <language>', 'language code (e.g. en, fr, ja)')
+			.addOption(EnumOption.create('-e, --engine <engine>', 'TTS engine', SPEAK_ENGINES))
+			.addOption(EnumOption.create('-l, --language <language>', 'language code', SPEAK_LANGUAGES))
 			.option('--personality', 'rewrite the text in-character before TTS')
 			.option('--base-url <url>', 'API base url')
 			.action(async (text: string, options: SpeakOptions) => {
