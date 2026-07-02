@@ -6,6 +6,17 @@ type GlobalOptions = {
 	baseUrl?: string;
 };
 
+/** A single download-progress event streamed by `GET /models/progress/{name}`. */
+type ModelProgressEvent = {
+	progress?: number;
+	current?: number;
+	total?: number;
+	filename?: string;
+	status?: string;
+};
+
+const TERMINAL_ERROR_STATES = new Set(['error', 'failed', 'cancelled', 'canceled']);
+
 /** Manage TTS models: status, load/unload, download, and migration. */
 export class ModelsCommand {
 	/** Register the `models` command group on the given Commander program. */
@@ -47,6 +58,15 @@ export class ModelsCommand {
 			.option('--base-url <url>', 'API base url')
 			.action(async (name: string, options: GlobalOptions) => {
 				await ModelsCommand.download(name, options);
+			});
+
+		models
+			.command('download-wait')
+			.description('Download a model, showing progress, and wait until it finishes')
+			.argument('<name>', 'model name')
+			.option('--base-url <url>', 'API base url')
+			.action(async (name: string, options: GlobalOptions) => {
+				await ModelsCommand.downloadWait(name, options);
 			});
 
 		models
@@ -145,6 +165,99 @@ export class ModelsCommand {
 	static async download(name: string, options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
 		console.log(JSON.stringify(await client.downloadModel(name), null, 2));
+	}
+
+	/**
+	 * Start a model download, render live progress, and block until the model
+	 * reports as downloaded.
+	 *
+	 * The progress SSE stream (`GET /models/progress/{name}`) drives the display,
+	 * while `GET /models/status` is polled as the authoritative completion signal
+	 * (the stream can go quiet on heartbeats without emitting a terminal event).
+	 */
+	static async downloadWait(name: string, options: GlobalOptions): Promise<void> {
+		const client = new VoiceboxClient(options.baseUrl);
+
+		if (await ModelsCommand.isDownloaded(client, name) === true) {
+			console.log(`${name} is already downloaded`);
+			return;
+		}
+
+		console.log(`Starting download of ${name}...`);
+		await client.downloadModel(name);
+
+		const iterator = client.streamModelProgress(name)[Symbol.asyncIterator]();
+		let pending = iterator.next();
+		const pollMs = 3000;
+
+		while (true) {
+			const settled = await Promise.race([
+				pending.then((result) => ({ kind: 'event' as const, result })),
+				ModelsCommand.delay(pollMs).then(() => ({ kind: 'poll' as const })),
+			]);
+
+			if (settled.kind === 'poll') {
+				if (await ModelsCommand.isDownloaded(client, name) === true) {
+					break;
+				}
+				continue;
+			}
+
+			if (settled.result.done === true) {
+				if (await ModelsCommand.isDownloaded(client, name) === true) {
+					break;
+				}
+				throw new Error(`download stream ended but ${name} is not downloaded`);
+			}
+
+			const event = settled.result.value as ModelProgressEvent;
+			const state = typeof event.status === 'string' ? event.status.toLowerCase() : '';
+			if (TERMINAL_ERROR_STATES.has(state) === true) {
+				throw new Error(`download failed: ${event.filename ?? event.status ?? state}`);
+			}
+			ModelsCommand.renderProgress(name, event);
+			pending = iterator.next();
+		}
+
+		if (process.stdout.isTTY === true) {
+			process.stdout.write('\n');
+		}
+		console.log(`✓ ${name} downloaded`);
+	}
+
+	/** Whether the named model currently reports as downloaded (`GET /models/status`). */
+	private static async isDownloaded(client: VoiceboxClient, name: string): Promise<boolean> {
+		const { models } = await client.modelStatus();
+		const model = models.find((entry) => entry.model_name === name);
+		return model !== undefined && model.downloaded === true;
+	}
+
+	/** Render a single progress line, updating in place on a TTY. */
+	private static renderProgress(name: string, event: ModelProgressEvent): void {
+		const hasTotal = event.total !== undefined && event.total > 0;
+		const percent = hasTotal
+			? Math.round(((event.current ?? 0) / (event.total as number)) * 100)
+			: event.progress === undefined ? 0 : Math.round(event.progress);
+		const bytes = hasTotal
+			? ` ${ModelsCommand.toMb(event.current ?? 0)}/${ModelsCommand.toMb(event.total as number)} MB`
+			: '';
+		const label = event.filename === undefined ? '' : ` ${event.filename}`;
+		const line = `${name}: ${percent}%${bytes}${label}`;
+		if (process.stdout.isTTY === true) {
+			process.stdout.write(`\r${line.padEnd(78).slice(0, 78)}`);
+			return;
+		}
+		console.log(line);
+	}
+
+	/** Format a byte count as whole megabytes. */
+	private static toMb(bytes: number): string {
+		return (bytes / (1024 * 1024)).toFixed(0);
+	}
+
+	/** Resolve after `ms` milliseconds. */
+	private static delay(ms: number): Promise<void> {
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
 	/** Cancel a stale/errored download task (`POST /models/download/cancel`). */

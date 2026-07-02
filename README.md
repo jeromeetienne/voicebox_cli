@@ -198,13 +198,14 @@ npx voicebox-cli history export-audio <id> -o outputs/take.wav
 
 ### `models`
 
-Manage the TTS models the server can use. `status` lists every model with its download and loaded state; `load` and `unload` control what sits in memory; `download`, `cancel-download`, and `delete` manage what is on disk; `cache-dir` shows where models are stored; and `progress`, `migrate`, and `migrate-progress` stream live progress from download and directory-migration tasks.
+Manage the TTS models the server can use. `status` lists every model with its download and loaded state; `load` and `unload` control what sits in memory; `download`, `download-wait`, `cancel-download`, and `delete` manage what is on disk; `cache-dir` shows where models are stored; and `progress`, `migrate`, and `migrate-progress` stream live progress from download and directory-migration tasks.
 
 ```
 npx voicebox-cli models status
 npx voicebox-cli models load [size]                      # size defaults to the server default
 npx voicebox-cli models unload [name]                    # no name unloads the default model
-npx voicebox-cli models download <name>
+npx voicebox-cli models download <name>                  # triggers the download, returns immediately
+npx voicebox-cli models download-wait <name>             # downloads, shows progress, blocks until done
 npx voicebox-cli models cancel-download <name>
 npx voicebox-cli models delete <name>
 npx voicebox-cli models cache-dir
@@ -217,6 +218,9 @@ npx voicebox-cli models migrate-progress                 # streams SSE progress
 npx voicebox-cli models status
 npx voicebox-cli models load 1.7B
 npx voicebox-cli models download qwen-1.7b
+
+# Download a transcription model and wait until it is ready to use
+npx voicebox-cli models download-wait whisper-large
 ```
 
 ### `stories`

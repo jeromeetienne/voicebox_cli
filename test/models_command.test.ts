@@ -108,6 +108,47 @@ test('models: progress streams and prints SSE events', async () => {
 	assert.ok(logs.some((l) => l.includes('"progress":1')));
 });
 
+test('models: download-wait starts the download, shows progress, waits for completion', async () => {
+	let statusCalls = 0;
+	const calls = TestHelpers.installFetch((path) => {
+		if (path === '/models/status') {
+			statusCalls += 1;
+			const downloaded = statusCalls > 1;
+			return TestHelpers.json({
+				models: [{ model_name: 'whisper-small', display_name: 'Whisper Small', downloaded, size_mb: downloaded ? 922 : null }],
+			});
+		}
+		if (path === '/models/download') {
+			return TestHelpers.json({ message: 'started' });
+		}
+		return TestHelpers.sse([
+			{ current: 0, total: 1000, progress: 0, filename: 'model.safetensors', status: 'downloading' },
+			{ current: 1000, total: 1000, progress: 100, filename: 'model.safetensors', status: 'downloading' },
+		]);
+	});
+	const logs = TestHelpers.captureLogs();
+
+	await ModelsCommand.downloadWait('whisper-small', {});
+
+	assert.ok(calls.some((c) => c.path === '/models/download' && c.method === 'POST'));
+	assert.ok(calls.some((c) => c.path === '/models/progress/whisper-small'));
+	assert.ok(logs.some((l) => l.includes('whisper-small: 100%')));
+	assert.ok(logs.some((l) => l.includes('✓ whisper-small downloaded')));
+});
+
+test('models: download-wait skips the download when already present', async () => {
+	const calls = TestHelpers.installFetch(() =>
+		TestHelpers.json({ models: [{ model_name: 'whisper-small', display_name: 'Whisper Small', downloaded: true, size_mb: 922 }] }),
+	);
+	const logs = TestHelpers.captureLogs();
+
+	await ModelsCommand.downloadWait('whisper-small', {});
+
+	assert.equal(calls.length, 1);
+	assert.equal(calls[0].path, '/models/status');
+	assert.ok(logs.some((l) => l.includes('already downloaded')));
+});
+
 test('models: migrate POSTs the destination and streams events', async () => {
 	const calls = TestHelpers.installFetch(() => TestHelpers.sse([{ status: 'copying' }, { status: 'done' }]));
 	const logs = TestHelpers.captureLogs();
