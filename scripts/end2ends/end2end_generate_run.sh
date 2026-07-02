@@ -10,7 +10,7 @@
 set -euo pipefail
 
 # Change to the project root directory
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 # Configuration
 TEXT='Hello world, how are you today?'
@@ -26,9 +26,10 @@ if [ -z "${PROFILES}" ]; then
 	exit 1
 fi
 
-# Extract the ID of the first profile
+# Extract the ID and name of the first profile
 FIRST_PROFILE_ID="$(printf '%s\n' "${PROFILES}" | head -n 1 | awk '{print $1}')"
-echo "==> Using first profile: ${FIRST_PROFILE_ID}"
+FIRST_PROFILE_NAME="$(printf '%s\n' "${PROFILES}" | head -n 1 | awk '{print $2}')"
+echo "==> Using first profile: ${FIRST_PROFILE_ID} (${FIRST_PROFILE_NAME})"
 
 # Create the output directory if it doesn't exist
 mkdir -p "$(dirname "${OUTPUT}")"
