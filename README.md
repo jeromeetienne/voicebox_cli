@@ -358,6 +358,36 @@ Options:
   --base-url <url>  API base url
 ```
 
+### `install`
+
+Install the bundled voicebox **skill** into an AI agent folder so an assistant such as Claude Code knows how to drive this CLI. It copies the `SKILL.md` tree into `<agent-folder>/skills/voicebox/`. The folder defaults to the current directory; pass a `.claude` folder (or any agent folder) to target a specific one.
+
+```
+npx voicebox-cli install [agent-folder]
+```
+
+```bash
+# Install into ./.claude for the current project (the usual case)
+npx voicebox-cli install .claude
+
+# Install into the current directory (the default when no folder is given)
+npx voicebox-cli install
+```
+
+## Use as an AI agent skill
+
+voicebox-cli ships a [SKILL.md](dotclaude_folder/skills/voicebox/SKILL.md) that teaches an AI coding agent (e.g. Claude Code) how to use these commands for text-to-speech and transcription. Install it into a project's agent folder with:
+
+```bash
+npx voicebox-cli install .claude
+```
+
+The bundled skill lives under `dotclaude_folder/skills/`, mirroring the `.claude/skills/` layout. When developing this repo, mirror `dotclaude_folder/` into the repo's own `.claude/` as symlinks so the skill is live while its source stays tracked:
+
+```bash
+npm run symlink:dotclaude
+```
+
 ## Output formats
 
 The API serves WAV; the CLI transcodes locally.
@@ -390,9 +420,16 @@ src/
     health_command.ts     # `health` command
     shutdown_command.ts   # `shutdown` command
     watchdog_command.ts   # `watchdog` command
+    install_command.ts    # `install` command (copies the bundled skill)
   misc/
     voicebox_client.ts    # VoiceboxClient — /speak, /profiles, status stream, audio download
     audio_convert.ts      # AudioConvert — WAV → MP3 via ffmpeg-static
+dotclaude_folder/
+  skills/
+    voicebox/
+      SKILL.md            # bundled agent skill, installed by `install`
+scripts/
+  symlink_dotclaude.sh    # mirror dotclaude_folder/ into .claude/ for local dev
 examples/
   generate_speech.ts      # library usage without the CLI
 outputs/                  # generated audio (git-ignored)
@@ -412,9 +449,10 @@ const wav = await client.downloadAudio(final.id);
 ## Scripts
 
 ```bash
-npm run cli        # run the CLI
-npm run typecheck  # tsc against tsconfig.json
-npm run build      # emit dist/ via tsconfig.build.json
+npm run cli               # run the CLI
+npm run symlink:dotclaude # mirror dotclaude_folder/ into .claude/ (local dev)
+npm run typecheck         # tsc against tsconfig.json
+npm run build             # emit dist/ via tsconfig.build.json
 ```
 
 ## License

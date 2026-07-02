@@ -24,13 +24,15 @@
 		}
 	},
 	"files": [
-		"dist"
+		"dist",
+		"dotclaude_folder"
 	],
 	"engines": {
 		"node": ">=20"
 	},
 	"scripts": {
 		"cli": "tsx src/cli.ts",
+		"symlink:dotclaude": "bash scripts/symlink_dotclaude.sh",
 		"test": "tsx --test test/*.test.ts",
 		"typecheck": "tsc -p tsconfig.json",
 		"build": "tsc -p tsconfig.build.json",

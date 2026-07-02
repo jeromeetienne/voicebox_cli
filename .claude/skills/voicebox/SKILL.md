@@ -1,0 +1,1 @@
+../../../dotclaude_folder/skills/voicebox/SKILL.md
