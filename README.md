@@ -55,13 +55,13 @@ Examples:
 
 ```bash
 # Simplest: text + voice profile → speech.mp3 (the default output)
-npx voicebox-cli speak "Hello there!" --profile Test
+npx voicebox-cli speak "Hello there" --profile Test
 
 # Save to a specific MP3 file
-npx voicebox-cli speak "Hello there!" --profile Test --output outputs/hello.mp3
+npx voicebox-cli speak "Hello there" --profile Test --output outputs/hello.mp3
 
 # Save as WAV instead (any non-.mp3 extension writes raw WAV)
-npx voicebox-cli speak "Hello there!" --profile Test --output outputs/hello.wav
+npx voicebox-cli speak "Hello there" --profile Test --output outputs/hello.wav
 
 # French, with a French voice
 npx voicebox-cli speak "Bonjour tout le monde !" --profile manukipu --language fr
