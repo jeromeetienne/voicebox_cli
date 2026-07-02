@@ -285,9 +285,26 @@ export class VoiceboxClient {
 		this.baseUrl = baseUrl.replace(/\/+$/, '');
 	}
 
+	/**
+	 * Wrap `fetch`, converting a connection failure into an actionable error
+	 * that explains the voicebox server is likely not running.
+	 */
+	private async fetchOrThrow(url: string, init?: RequestInit): Promise<Response> {
+		try {
+			return await fetch(url, init);
+		} catch (error: unknown) {
+			throw new Error(
+				`could not reach the voicebox server at ${this.baseUrl}. ` +
+					'Check that voicebox is running (and that --base-url points to it), ' +
+					'then start the voicebox server if it is not.',
+				{ cause: error },
+			);
+		}
+	}
+
 	/** Perform a request and parse the JSON body as `T`, throwing on non-2xx. */
 	private async requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-		const response = await fetch(`${this.baseUrl}${path}`, init);
+		const response = await this.fetchOrThrow(`${this.baseUrl}${path}`, init);
 		if (response.ok === false) {
 			const detail = await response.text();
 			throw new Error(`${init?.method ?? 'GET'} ${path} failed (${response.status}): ${detail}`);
@@ -297,7 +314,7 @@ export class VoiceboxClient {
 
 	/** Perform a request and return the raw response bytes, throwing on non-2xx. */
 	private async requestBytes(path: string, init?: RequestInit): Promise<Uint8Array> {
-		const response = await fetch(`${this.baseUrl}${path}`, init);
+		const response = await this.fetchOrThrow(`${this.baseUrl}${path}`, init);
 		if (response.ok === false) {
 			const detail = await response.text();
 			throw new Error(`${init?.method ?? 'GET'} ${path} failed (${response.status}): ${detail}`);
@@ -307,7 +324,7 @@ export class VoiceboxClient {
 
 	/** Perform a request, discarding the body, throwing on non-2xx. */
 	private async requestVoid(path: string, init?: RequestInit): Promise<void> {
-		const response = await fetch(`${this.baseUrl}${path}`, init);
+		const response = await this.fetchOrThrow(`${this.baseUrl}${path}`, init);
 		if (response.ok === false) {
 			const detail = await response.text();
 			throw new Error(`${init?.method ?? 'GET'} ${path} failed (${response.status}): ${detail}`);
@@ -327,7 +344,7 @@ export class VoiceboxClient {
 	 * parsed as JSON, throwing on non-2xx.
 	 */
 	private async *streamEvents(path: string, init?: RequestInit): AsyncGenerator<unknown> {
-		const response = await fetch(`${this.baseUrl}${path}`, init);
+		const response = await this.fetchOrThrow(`${this.baseUrl}${path}`, init);
 		if (response.ok === false || response.body === null) {
 			const detail = await response.text();
 			throw new Error(`${init?.method ?? 'GET'} ${path} failed (${response.status}): ${detail}`);
@@ -627,7 +644,7 @@ export class VoiceboxClient {
 	 * @throws If the stream closes before any status is received.
 	 */
 	async waitForCompletion(generationId: string): Promise<GenerationStatus> {
-		const response = await fetch(`${this.baseUrl}/generate/${generationId}/status`);
+		const response = await this.fetchOrThrow(`${this.baseUrl}/generate/${generationId}/status`);
 
 		if (response.ok === false || response.body === null) {
 			const detail = await response.text();

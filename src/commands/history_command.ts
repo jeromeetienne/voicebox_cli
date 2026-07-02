@@ -139,7 +139,20 @@ export class HistoryCommand {
 	/** Print aggregate generation statistics as JSON (`GET /history/stats`). */
 	static async stats(options: GlobalOptions): Promise<void> {
 		const client = new VoiceboxClient(options.baseUrl);
-		console.log(JSON.stringify(await client.historyStats(), null, 2));
+		const [stats, profiles] = await Promise.all([
+			client.historyStats(),
+			client.listProfiles(),
+		]);
+		const nameById = new Map(profiles.map((profile) => [profile.id, profile.name]));
+		const raw = stats as { generations_by_profile?: Record<string, number> };
+		if (raw.generations_by_profile !== undefined) {
+			const byName: Record<string, number> = {};
+			for (const [profileId, count] of Object.entries(raw.generations_by_profile)) {
+				byName[nameById.get(profileId) ?? profileId] = count;
+			}
+			raw.generations_by_profile = byName;
+		}
+		console.log(JSON.stringify(raw, null, 2));
 	}
 
 	/** Toggle a generation's favorite flag (`POST /history/{id}/favorite`). */
