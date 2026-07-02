@@ -20,7 +20,10 @@ export class EnumOption {
 		);
 		option.argParser((value: string): string => {
 			if (value === 'list') {
-				console.log(values.join('\n'));
+				console.log(`Accepted values for ${option.name()} (${values.length}):`);
+				for (const accepted of values) {
+					console.log(`  ${accepted}`);
+				}
 				process.exit(0);
 			}
 			if (values.includes(value) === false) {

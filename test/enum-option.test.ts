@@ -46,7 +46,7 @@ test("enum-option: 'list' prints every value and exits", () => {
 	}
 
 	assert.equal(exitCode, 0);
-	assert.deepEqual(logs, ['base\nsmall\nturbo']);
+	assert.deepEqual(logs, ['Accepted values for model (3):', '  base', '  small', '  turbo']);
 });
 
 test('enum-option: applies the default value', () => {
