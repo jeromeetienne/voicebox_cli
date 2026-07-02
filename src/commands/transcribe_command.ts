@@ -47,9 +47,13 @@ export class TranscribeCommand {
 			? basename(file)
 			: `${basename(file, extname(file))}.wav`;
 
+		const model = options.model === undefined
+			? undefined
+			: options.model.replace(/^whisper-/, '');
+
 		const result = await client.transcribe(
 			{ data, filename },
-			{ language: options.language, model: options.model },
+			{ language: options.language, model },
 		);
 
 		if (options.json === true) {

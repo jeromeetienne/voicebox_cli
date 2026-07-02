@@ -19,7 +19,13 @@ export const SPEAK_LANGUAGES = [
 export type SpeakLanguage = (typeof SPEAK_LANGUAGES)[number];
 
 /** Whisper model sizes accepted by the `POST /transcribe` endpoint. */
-export const TRANSCRIBE_MODELS = ['base', 'small', 'medium', 'large', 'turbo'] as const;
+export const TRANSCRIBE_MODELS = [
+	'whisper-base',
+	'whisper-small',
+	'whisper-medium',
+	'whisper-large',
+	'whisper-turbo',
+] as const;
 export type TranscribeModel = (typeof TRANSCRIBE_MODELS)[number];
 
 /** Body for the simplified `POST /speak` endpoint. */
