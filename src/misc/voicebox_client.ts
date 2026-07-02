@@ -207,7 +207,7 @@ export type ModelStatusListResponse = {
 
 /** The transcript returned by `POST /transcribe`. */
 export type TranscriptionResponse = {
-	text: string;
+	text?: string;
 	duration: number;
 };
 

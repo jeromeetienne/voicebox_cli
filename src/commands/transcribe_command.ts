@@ -56,6 +56,11 @@ export class TranscribeCommand {
 			console.log(JSON.stringify(result, null, 2));
 			return;
 		}
+		if (result.text === undefined || result.text === null) {
+			throw new Error(
+				'transcription returned no text (the model may still be loading — retry in a moment)',
+			);
+		}
 		console.log(result.text);
 	}
 }
