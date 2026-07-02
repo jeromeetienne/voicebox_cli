@@ -21,7 +21,10 @@ export class TranscribeCommand {
 			.description('Transcribe an audio file to text')
 			.argument('<file>', 'audio file path')
 			.option('-l, --language <language>', 'language hint (e.g. en, fr, ja)')
-			.option('-m, --model <model>', 'transcription model')
+			.option(
+				'-m, --model <model>',
+				'transcription model: whisper-base (default), whisper-small, whisper-medium, whisper-large, whisper-turbo',
+			)
 			.option('--json', 'print the raw JSON response')
 			.option('--base-url <url>', 'API base url')
 			.action(async (file: string, options: TranscribeOptions) => {

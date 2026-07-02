@@ -33,7 +33,7 @@ command works against the current API.
 | --- | --- | --- |
 | [`end2end_generate_run.sh`](end2end_generate_run.sh) | `generate run` | Synthesizes text to a WAV using the first voice profile. |
 | [`end2end_speak.sh`](end2end_speak.sh) | `speak` | Synthesizes text to an MP3 using the first voice profile. |
-| [`end2end_transcribe.sh`](end2end_transcribe.sh) | `transcribe` | Speaks a sentence, then transcribes the audio back to text (round-trip). |
+| [`end2end_transcribe.sh`](end2end_transcribe.sh) | `transcribe` | Generates audio for a sentence, then transcribes it back to text (round-trip). |
 
 ## Running
 

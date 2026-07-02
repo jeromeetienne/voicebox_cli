@@ -269,7 +269,7 @@ npx voicebox-cli transcribe <file> [options]
 
 Options:
   -l, --language <language>  language hint (e.g. en, fr, ja)
-  -m, --model <model>        transcription model
+  -m, --model <model>        transcription model: whisper-base (default), whisper-small, whisper-medium, whisper-large, whisper-turbo
   --json                     print the raw JSON response
   --base-url <url>           API base url
   -h, --help                 display help for command
@@ -287,7 +287,7 @@ npx voicebox-cli transcribe outputs/take.mp3
 # Give a language hint for better accuracy
 npx voicebox-cli transcribe outputs/take.wav --language en
 
-# Pick a specific transcription model
+# Pick a specific transcription model (whisper-base, whisper-small, whisper-medium, whisper-large, whisper-turbo)
 npx voicebox-cli transcribe outputs/take.wav --model whisper-turbo
 
 # Get the raw JSON (includes the audio duration)

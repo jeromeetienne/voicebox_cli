@@ -3,8 +3,8 @@
 # end2end_transcribe.sh — synthesize a sample sentence into an audio file, then
 # transcribe it back to text using the `transcribe` command.
 #
-# It first generates an audio file with `speak` (using the first voice profile),
-# then runs `transcribe` on that file and prints the recovered text.
+# It first generates an audio file with `generate run` (using the first voice
+# profile), then runs `transcribe` on that file and prints the recovered text.
 
 # Exit on any error, undefined variable, or pipe failure
 set -euo pipefail
@@ -14,7 +14,7 @@ cd "$(dirname "$0")/../.."
 
 # Configuration
 TEXT='Hello world, how are you today?'
-AUDIO_FILE='outputs/end2end_transcribe.mp3'
+AUDIO_FILE='outputs/end2end_transcribe.wav'
 
 # Fetch available voice profiles from the API
 echo '==> Fetching profiles...'
@@ -35,8 +35,8 @@ echo "==> Using first profile: ${FIRST_PROFILE_ID} (${FIRST_PROFILE_NAME})"
 mkdir -p "$(dirname "${AUDIO_FILE}")"
 
 # Generate the audio file to transcribe
-echo "==> Speaking '${TEXT}'..."
-npx voicebox-cli speak "${TEXT}" --profile "${FIRST_PROFILE_ID}" --output "${AUDIO_FILE}"
+echo "==> Generating audio for '${TEXT}'..."
+npx voicebox-cli generate run "${FIRST_PROFILE_ID}" "${TEXT}" --output "${AUDIO_FILE}"
 
 # Transcribe the generated audio file back to text
 echo "==> Transcribing '${AUDIO_FILE}'..."
