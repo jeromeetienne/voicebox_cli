@@ -1,0 +1,14 @@
+{
+	"folders": {
+		"cli_commands": ["src/cli.ts", "src/commands/"],
+		"client_library": [
+			"src/misc/voicebox_client.ts",
+			"src/misc/audio_convert.ts",
+			"src/misc/enum-option.ts"
+		],
+		"data_models": ["src/misc/voicebox_client.ts"],
+		"api_reference": ["data/voicebox_openapi.yaml"],
+		"agent_skill": ["dotclaude_folder/skills/voicebox/SKILL.md"],
+		"examples": ["examples/generate_speech.ts", "scripts/end2ends/"]
+	}
+}
